@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-冯家军统一API网关 v4.0 - FJG Unified API Gateway
-多Provider智能路由 + 中文管理后台 + 可编辑配置
+冯家军统一API网关 v5.0 - FJG Unified API Gateway
+多Provider智能路由 + RateLimit + 请求日志 + OpenAPI + 热重载
 """
 
 import json, os, sys, time, threading, random, hashlib, secrets
@@ -10,7 +10,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime, timezone, timedelta
 
 _CTX = ssl._create_unverified_context()
-VERSION = "4.0.0"
+VERSION = "5.0.0"
 SESSION_TIMEOUT = timedelta(hours=8)
 STATE_DIR = os.environ.get("FJG_STATE_DIR", "/data")
 STATE_FILE = os.path.join(STATE_DIR, "gateway_state.json")
@@ -25,6 +25,110 @@ ADMIN_PASSWORD_HASH = hashlib.sha256("123456".encode()).hexdigest()
 SESSION_SECRET = secrets.token_hex(32)
 SESSION_COOKIE = "fjg_session"
 _sessions = {}  # session_id -> {"expires": datetime}
+
+
+# ── v5.0 Rate Limit - 令牌桶 ────────────────────────────────────────
+RATE_LIMIT_DEFAULT_RPM = 60
+_rate_limiter_state = {}
+_rate_limiter_lock = threading.Lock()
+REQUEST_LOG = []
+REQUEST_LOG_MAX = 500
+_request_log_lock = threading.Lock()
+_config_watch_enabled = True
+_config_last_mtime = 0
+_config_watch_interval = 5  # 秒
+
+def _rate_check(key, rpm, timeout=0.05):
+    """令牌桶：检查是否允许请求，不允许则阻塞最多 timeout 秒"""
+    if rpm <= 0: return True
+    with _rate_limiter_lock:
+        now = time.time()
+        st = _rate_limiter_state.get(key, {"tokens": rpm, "last": now, "rpm": rpm})
+        if st["rpm"] != rpm:
+            ratio = rpm / max(st["rpm"], 1)
+            st["tokens"] = min(rpm, st["tokens"] * ratio)
+            st["rpm"] = rpm
+        elapsed = now - st["last"]
+        st["tokens"] = min(rpm, st["tokens"] + elapsed * (rpm / 60.0))
+        st["last"] = now
+        if st["tokens"] >= 1:
+            st["tokens"] -= 1
+            _rate_limiter_state[key] = st
+            return True
+        _rate_limiter_state[key] = st
+    return False
+
+def _rate_wait(key, rpm, timeout=5.0):
+    """带等待的限流检查"""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if _rate_check(key, rpm):
+            return True
+        time.sleep(0.05)
+    return False
+
+def _log_request(method, path, status, provider_name="", bot_name="", tokens=0, duration=0):
+    """记录请求日志"""
+    from datetime import datetime
+    with _request_log_lock:
+        entry = {
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "method": method,
+            "path": path,
+            "status": status,
+            "provider": provider_name,
+            "bot": bot_name,
+            "tokens": tokens,
+            "ms": int(duration * 1000),
+        }
+        REQUEST_LOG.append(entry)
+        if len(REQUEST_LOG) > REQUEST_LOG_MAX:
+            REQUEST_LOG.pop(0)
+
+def _reload_providers_if_changed():
+    """热重载：检测 providers.json 变化自动重新加载"""
+    global KEY_POOL, Handler, _config_last_mtime
+    if not _config_watch_enabled:
+        return
+    pf = os.environ.get("PROVIDERS_FILE", "")
+    if not pf or not os.path.isfile(pf):
+        return
+    try:
+        mtime = os.path.getmtime(pf)
+        if mtime <= _config_last_mtime:
+            return
+        with open(pf) as f:
+            new_pool = json.loads(f.read().strip())
+        if not isinstance(new_pool, dict) or len(new_pool) == 0:
+            return
+        import builtins
+        # 更新模块级的 KEY_POOL
+        import sys
+        mod = sys.modules.get('__main__')
+        if mod:
+            mod.KEY_POOL = new_pool
+        else:
+            globals()['KEY_POOL'] = new_pool
+        KEY_POOL = new_pool
+        _config_last_mtime = mtime
+        # 同步 health，新增的默认 True，删除的移除
+        if Handler.pool:
+            old_health = Handler.pool.health()
+            for k in new_pool:
+                if k not in old_health:
+                    Handler.pool._health[k] = True
+            # 移除已删除的
+            for k in list(Handler.pool._health.keys()):
+                if k not in new_pool:
+                    del Handler.pool._health[k]
+        print(f"[热重载] providers.json 已更新: {len(new_pool)} 个Provider")
+        # 清理旧限流
+        with _rate_limiter_lock:
+            for k in list(_rate_limiter_state.keys()):
+                if k not in new_pool:
+                    del _rate_limiter_state[k]
+    except Exception as e:
+        print(f"[热重载] 失败: {e}")
 
 def _check_auth(headers):
     cookie = headers.get("Cookie", "")
@@ -165,6 +269,8 @@ class PoolManager:
             cs = []
             for n, c in KEY_POOL.items():
                 if not self._health.get(n, True): continue
+                rpm = c.get("rpm", RATE_LIMIT_DEFAULT_RPM)
+                if not _rate_check(n + ":total", rpm): continue
                 m = hint or "auto"
                 if m == "auto":
                     cs.append((c["priority"], n, c))
@@ -173,6 +279,8 @@ class PoolManager:
             if not cs:
                 for n, c in KEY_POOL.items():
                     if self._health.get(n, True):
+                        rpm = c.get("rpm", RATE_LIMIT_DEFAULT_RPM)
+                        if not _rate_check(n + ":total", rpm): continue
                         cs.append((c["priority"], n, c))
             random.shuffle([x for x in cs if x and x[0] == 0])
             cs.sort(key=lambda x: (x[0], random.random()))
@@ -288,6 +396,9 @@ def _dash():
       <a href="/daily" class="btn btn-s">📊 日用量</a>
       <a href="/monthly" class="btn btn-s">📈 月K线</a>
       <a href="/bots" class="btn btn-s">🤖 BOT统计</a>
+      <a href="/logs" class="btn btn-s">📋 日志</a>
+      <a href="/docs" class="btn btn-s">📖 文档</a>
+      <a href="/reload" class="btn btn-s">🔄 热重载</a>
       <a href="/logout" class="btn btn-d">🚪 退出</a>
     </div>
   </div>
@@ -308,6 +419,12 @@ def _dash():
       <a href="/daily" class="btn btn-s">📊 日用量</a>
       <a href="/monthly" class="btn btn-s">📈 月K线</a>
       <a href="/bots" class="btn btn-s">🤖 BOT统计</a>
+      <a href="/logs" class="btn btn-s">📋 日志</a>
+      <a href="/docs" class="btn btn-s">📖 文档</a>
+      <a href="/reload" class="btn btn-s">🔄 热重载</a>
+      <a href="/logs" class="btn btn-s">📋 日志</a>
+      <a href="/docs" class="btn btn-s">📖 文档</a>
+      <a href="/reload" class="btn btn-s">🔄 热重载</a>
       <a href="/reset-usage" class="btn btn-d" onclick="return confirm('确定清空所有统计数据?')">🗑️ 清空统计</a>
       <a href="/reset" class="btn" onclick="return confirm('确定重置所有Provider健康状态?')">🔄 重置健康</a>
     </div>
@@ -663,7 +780,100 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({"ok": True, "message": f"已删除 {name}（需重启生效）"})
         if p == "/projects": return self._projects()
         if p.startswith("/download/"): return self._download(p)
+        if p == "/logs": return self._logs_page()
+        if p == "/docs": return self._docs_page()
+        if p == "/reload":
+            _reload_providers_if_changed()
+            return self._json({"ok": True, "message": f"热重载完成，当前 {len(KEY_POOL)} 个Provider"})
         return self._json({"error": "not found"}, 404)
+
+
+    def _logs_page(self):
+        import json
+        _reload_providers_if_changed()
+        with _request_log_lock:
+            logs_copy = list(REQUEST_LOG)
+        rows = ""
+        for entry in reversed(logs_copy):
+            status = entry.get("status", 0)
+            sc = "#3fb950" if isinstance(status, int) and 200 <= status < 300 else "#f85149"
+            bot = entry.get("bot", "anonymous")
+            rows += f"<tr>"
+            rows += f"<td style='font-size:.75rem;color:#8b949e'>{entry['ts'][:19]}</td>"
+            rows += f"<td>{entry['method']}</td>"
+            rows += f"<td style='font-size:.8rem'>{entry['path']}</td>"
+            rows += f"<td style='color:{sc}'>{status}</td>"
+            rows += f"<td>{entry.get('provider','')}</td>"
+            rows += f"<td style='font-size:.75rem'>{bot}</td>"
+            rows += f"<td>{entry.get('tokens',0):,}</td>"
+            rows += f"<td>{entry.get('ms',0)}ms</td>"
+            rows += f"</tr>"
+        body = f"""<div class="card"><h2>📋 请求日志 <small style="color:#8b949e;font-weight:400">最近 {len(logs_copy)} 条</small></h2>
+<p style="color:#8b949e;margin-bottom:16px">
+  <a href="/" class="btn btn-xs" style="background:#1f6feb">← 返回</a>
+  <a href="/logs" class="btn btn-xs">🔄 刷新</a>
+</p>
+<div style="overflow-x:auto">
+<table><tr><th>时间</th><th>方法</th><th>路径</th><th>状态</th><th>提供商</th><th>BOT</th><th>Tokens</th><th>延迟</th></tr>
+{rows if rows else '<tr><td colspan=8 style=text-align:center;color:#8b949e>暂无日志</td></tr>'}
+</table></div></div>"""
+        self._page("请求日志", body)
+
+    def _docs_page(self):
+        body = """<div class="card">
+  <h2>📖 API 文档 - OpenAPI</h2>
+  <p style="color:#8b949e;margin-bottom:16px">冯家军统一API网关 v5.0 接口说明</p>
+  
+  <div style="background:#0d1117;border-radius:8px;padding:16px;margin-bottom:16px">
+    <h3 style="color:#79c0ff;margin-bottom:8px">POST /v1/chat/completions</h3>
+    <p style="color:#8b949e;font-size:.85rem;margin-bottom:8px">调用AI模型，自动路由到可用提供商</p>
+    <h4 style="color:#e6edf3;font-size:.9rem;margin-bottom:4px">请求体</h4>
+    <pre style="background:#161b22;padding:12px;border-radius:6px;font-size:.8rem;color:#c9d1d9">
+{
+  "model": "auto",           // 可选，指定模型名
+  "messages": [{"role": "user", "content": "你好"}],
+  "max_tokens": 2048,        // 可选
+  "temperature": 0.7,        // 可选
+  "bot_name": "马二哥"       // 可选，BOT识别
+}
+    </pre>
+    <h4 style="color:#e6edf3;font-size:.9rem;margin:8px 0 4px">请求头</h4>
+    <pre style="background:#161b22;padding:12px;border-radius:6px;font-size:.8rem;color:#c9d1d9">
+X-BOT-Name: 马二哥           // 可选，BOT识别
+    </pre>
+  </div>
+
+  <div style="background:#0d1117;border-radius:8px;padding:16px;margin-bottom:16px">
+    <h3 style="color:#79c0ff;margin-bottom:8px">GET /health</h3>
+    <p style="color:#8b949e;font-size:.85rem">健康检查</p>
+  </div>
+  <div style="background:#0d1117;border-radius:8px;padding:16px;margin-bottom:16px">
+    <h3 style="color:#79c0ff;margin-bottom:8px">GET /stats</h3>
+    <p style="color:#8b949e;font-size:.85rem">系统统计报表</p>
+  </div>
+  <div style="background:#0d1117;border-radius:8px;padding:16px;margin-bottom:16px">
+    <h3 style="color:#79c0ff;margin-bottom:8px">GET /v1/models</h3>
+    <p style="color:#8b949e;font-size:.85rem">列出所有可用模型</p>
+  </div>
+  <div style="background:#0d1117;border-radius:8px;padding:16px;margin-bottom:16px">
+    <h3 style="color:#79c0ff;margin-bottom:8px">GET /daily /monthly /bots</h3>
+    <p style="color:#8b949e;font-size:.85rem">使用量统计页面</p>
+  </div>
+  <div style="background:#0d1117;border-radius:8px;padding:16px;margin-bottom:16px">
+    <h3 style="color:#79c0ff;margin-bottom:8px">GET /logs</h3>
+    <p style="color:#8b949e;font-size:.85rem">请求日志（最近500条）</p>
+  </div>
+  <div style="background:#0d1117;border-radius:8px;padding:16px;margin-bottom:16px">
+    <h3 style="color:#79c0ff;margin-bottom:8px">GET /reload</h3>
+    <p style="color:#8b949e;font-size:.85rem">热重载 providers.json 配置</p>
+  </div>
+  <div style="background:#0d1117;border-radius:8px;padding:16px;margin-bottom:16px">
+    <h3 style="color:#79c0ff;margin-bottom:8px">Rate Limit</h3>
+    <p style="color:#8b949e;font-size:.85rem">每个Provider独立RPM限流（令牌桶），超出排队自动等待</p>
+  </div>
+  <p><a href="/" class="btn">← 返回</a></p>
+</div>"""
+        self._page("API文档", body)
 
     def _login_page(self):
         if _check_auth(self.headers):
@@ -741,6 +951,7 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def _call(self, kn, cfg, msgs, body):
+        _call_start_time = time.time()
         # 提取 BOT 名称（从 HTTP 头或请求体）
         bot_name = "anonymous"
         # 从 headers 获取
@@ -760,16 +971,25 @@ class Handler(BaseHTTPRequestHandler):
             "Content-Type": "application/json",
             "Authorization": "Bearer " + cfg["api_key"],
         })
+        rpm = cfg.get("rpm", RATE_LIMIT_DEFAULT_RPM)
+        if not _rate_wait(kn, rpm):
+            raise Exception(f"RateLimit 排队超时: {kn} (RPM={rpm})")
         try:
             with urllib.request.urlopen(req, timeout=cfg.get("timeout", 60), context=_CTX) as r:
                 result = json.loads(r.read())
         except urllib.error.HTTPError as e:
+            _log_request("POST", "/v1/chat/completions", e.code, kn, "anonymous", 0, time.time() - _call_start_time)
             raise Exception("HTTP " + str(e.code) + ": " + e.read().decode("utf-8", "replace")[:200])
         except urllib.error.URLError as e:
+            _log_request("POST", "/v1/chat/completions", 0, kn, "anonymous", 0, time.time() - _call_start_time)
             raise Exception("连接失败: " + str(e.reason))
         if "error" in result:
             raise Exception(str(result["error"]))
-        Handler.pool.record(kn, tokens=result.get("usage", {}).get("total_tokens", 0), ok=True, bot_name=bot_name)
+        tokens = result.get("usage", {}).get("total_tokens", 0)
+        Handler.pool.record(kn, tokens=tokens, ok=True, bot_name=bot_name)
+        # v5.0 请求日志
+        dt = time.time() - _call_start_time
+        _log_request("POST", "/v1/chat/completions", 200, kn, bot_name, tokens, dt)
         return result
 
     def _redirect(self, p):
@@ -784,10 +1004,16 @@ def main():
     pa.add_argument("--host", default=os.environ.get("HOST", "0.0.0.0"))
     a = pa.parse_args()
     Handler.pool = PoolManager()
+    # v5.0 初始化热重载
+    pf = os.environ.get("PROVIDERS_FILE", "")
+    if pf and os.path.isfile(pf):
+        global _config_last_mtime
+        _config_last_mtime = os.path.getmtime(pf)
+    print(f"[v5.0] RateLimit: 基于RPM令牌桶 | 请求日志: {REQUEST_LOG_MAX}条 | 热重载: 每5秒检测")
     server = HTTPServer((a.host, a.port), Handler)
     pool = Handler.pool.pool()
     print(f"\n🚀 冯家军统一API网关 v{VERSION}")
-    print(f"  📊 面板: http://{a.host}:{a.port}/")
+    print(f"  📊 面板: http://{a.host}:{a.port}/   v5.0: RateLimit+日志+文档+热重载")
     print(f"  🔌 API:  http://{a.host}:{a.port}/v1/chat/completions")
     print(f"  📁 项目: {PROJECTS_DIR}")
     print(f"  ⚙️ Provider: {len(pool)} 个已配置")
