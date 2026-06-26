@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索引擎登录入口（开放平台、sitemap、导航站登陆入口大全）</title>
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #4285f4;
+            --accent-color: #34a853;
+            --background-color: #f8f9fa;
+            --card-color: #ffffff;
+            --text-color: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #dadce0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-hover: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 0 0 10px 10px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin: 25px 0 15px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .category-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+        
+        .category-btn {
+            padding: 10px 20px;
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+        
+        .category-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .section {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+        }
+        
+        .link-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 15px;
+        }
+        
+        .link-item {
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .link-item:hover {
+            background-color: rgba(66, 133, 244, 0.05);
+            border-color: var(--primary-color);
+        }
+        
+        .link-item a {
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .link-item a:hover {
+            color: var(--primary-color);
+        }
+        
+        .link-item a::before {
+            content: "🔗";
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .update-date {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 40px;
+            font-size: 0.9rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        @media (max-width: 768px) {
+            .link-list {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .category-btn {
+                padding: 8px 15px;
+                font-size: 0.8rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 20px 10px;
+            }
+            
+            h1 {
+                font-size: 1.7rem;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>搜索引擎登录入口大全</h1>
+        <h3>开放平台、sitemap、导航站登陆入口大全</h3>
+    </header>
+    
+    <div class="container">
+        <div class="category-nav">
+            <a href="#sousuo" class="category-btn">搜索引擎提交入口</a>
+            <a href="#daohang" class="category-btn">导航站提交入口</a>
+            <a href="#blog" class="category-btn">博客提交入口</a>
+            <a href="#tousu" class="category-btn">网站投诉大全</a>
+            <a href="#yingwen" class="category-btn">英文搜索提交</a>
+            <a href="#kaifang" class="category-btn">开放平台大全</a>
+            <a href="#sitemap" class="category-btn">Sitemap大全</a>
+            <a href="#wangguan" class="category-btn">网管工具大全</a>
+        </div>
+        
+        <section id="sousuo" class="section">
+            <h2>搜索引擎网站收录地址大全</h2>
+            <ul class="link-list">
+                <li class="link-item"><a href="http://zhanzhang.baidu.com/sitesubmit/index" target="_blank">百度搜索网址提交入口</a></li>
+                <li class="link-item"><a href="http://info.so.360.cn/site_submit.html" target="_blank">360搜索引擎登录入口</a></li>
+                <li class="link-item"><a href="http://info.so.360.cn/news_submit.html" target="_blank">360新闻源收录入口</a></li>
+                <li class="link-item"><a href="https://www.google.com/webmasters/tools/submit-url?pli=1" target="_blank">Google网址提交入口</a></li>
+                <li class="link-item"><a href="http://www.google.com/support/news_pub/bin/request.py?contact_type=suggest_content&hl=cn" target="_blank">Google新闻网站内容</a></li>
+                <li class="link-item"><a href="http://www.sogou.com/feedback/urlfeedback.php" target="_blank">搜狗网站收录提交入口</a></li>
+                <li class="link-item"><a href="http://www.soso.com/help/usb/urlsubmit.shtml" target="_blank">SOSO搜搜网站收录提交入口</a></li>
+                <li class="link-item"><a href="http://zz.jike.com/submit/genUrlForm" target="_blank">即刻搜索网站提交入口</a></li>
+                <li class="link-item"><a href="http://open.panguso.com/data/resource/url/new" target="_blank">盘古数据开放平台</a></li>
+                <li class="link-item"><a href="http://www.bing.com/toolbox/submit-site-url" target="_blank">bing(必应)网页提交登录入口</a></li>
+                <li class="link-item"><a href="http://www.jianso.com/add_site.html" target="_blank">简搜搜索引擎登陆口</a></li>
+                <li class="link-item"><a href="http://sitemap.cn.yahoo.com/" target="_blank">雅虎中国网站登录口</a></li>
+                <li class="link-item"><a href="http://tellbot.youdao.com/report" target="_blank">网易有道搜索引擎登录口</a></li>
+                <li class="link-item"><a href="http://register.zhongsou.com/NetSearch/frontEnd/free_protocol.htm" target="_blank">中搜免费登录服务</a></li>
+                <li class="link-item"><a href="http://cn.bing.com/docs/submit.aspx?FORM=WSDD2" target="_blank">MSN必应网站登录口</a></li>
+                <li class="link-item"><a href="http://www.alexa.com/help/webmasters" target="_blank">Alexa网站登录入口</a></li>
+                <li class="link-item"><a href="http://search.tom.com/tools/weblog/log.php" target="_blank">TOM搜索网站登录口</a></li>
+                <li class="link-item"><a href="http://search.b2b.cn/pageIncluded/AddPage.php" target="_blank">铭万网B2B(必途)网址登陆口</a></li>
+                <li class="link-item"><a href="http://www.antso.com/apply.asp" target="_blank">蚁搜搜索网站登录口</a></li>
+                <li class="link-item"><a href="http://www.kuaisou.com/main/inputweb.asp" target="_blank">快搜搜索网站登录口</a></li>
+            </ul>
+        </section>
+        
+        <section id="blog" class="section">
+            <h2>独立博客收录提交网址</h2>
+            <ul class="link-list">
+                <li class="link-item"><a href="http://utility.baidu.com/blogsearch/submit.php" target="_blank">百度博客提交</a></li>
+                <li class="link-item"><a href="http://blogsearch.google.com/ping" target="_blank">Google博客提交</a></li>
+                <li class="link-item"><a href="http://search.help.cn.yahoo.com/h4_4.html" target="_blank">雅虎中国博客提交</a></li>
+                <li class="link-item"><a href="http://www.feedsky.com/" target="_blank">FeedSky提交博客</a></li>
+                <li class="link-item"><a href="http://www.sogou.com/feedback/blogfeedback.php" target="_blank">搜狗(SoGou)博客提交</a></li>
+                <li class="link-item"><a href="http://tellbot.yodao.com/" target="_blank">有道(YoDao)博客提交</a></li>
+                <li class="link-item"><a href="http://www.bing.com/toolbox/submit-site-url" target="_blank">必应 Bing博客提交</a></li>
+                <li class="link-item"><a href="http://www.soso.com/help/usb/urlsubmit.shtml" target="_blank">搜搜博客提交</a></li>
+            </ul>
+        </section>
+        
+        <section id="yingwen" class="section">
+            <h2>英文搜索网站收录地址</h2>
+            <ul class="link-list">
+                <li class="link-item"><a href="http://www.dmoz.org/World/Chinese_Simplified" target="_blank">Dmoz网站登录入口</a></li>
+                <li class="link-item"><a href="http://intelseek.com/add_url_form.asp" target="_blank">NetSearch登陆口</a></li>
+                <li class="link-item"><a href="http://www.freewebsubmission.com/" target="_blank">Freewebsubmission.com 搜索引擎批量提交</a></li>
+                <li class="link-item"><a href="http://www.trafficzap.com/searchsubmit.php" target="_blank">快速登录20个搜索引擎</a></li>
+                <li class="link-item"><a href="http://www.hotbot.com/prefs_filters.asp?prov=Inktomifilter=web" target="_blank">HotBot登录口</a></li>
+                <li class="link-item"><a href="http://about.netscape.com/" target="_blank">netscape登录口</a></li>
+                <li class="link-item"><a href="http://www.addme.com/submission/free-submission-start.php" target="_blank">AddMe登陆口</a></li>
+                <li class="link-item"><a href="http://www.gigablast.com/addurl" target="_blank">Gigablast登录口</a></li>
+                <li class="link-item"><a href="http://www.aeiwi.com/submit.html" target="_blank">Aeiwi登录口</a></li>
+                <li class="link-item"><a href="http://www.infotiger.com/addurl.html" target="_blank">Infotiger登录口</a></li>
+            </ul>
+        </section>
+        
+        <section id="daohang" class="section">
+            <h2>网址导航站收录申请登陆口大全</h2>
+            <ul class="link-list">
+                <li class="link-item"><a href="http://submit.hao123.com/static/auditSys/wztj.htm" target="_blank">hao123网址收录</a></li>
+                <li class="link-item"><a href="http://hao.360.cn/url.html" target="_blank">360网址导航收录入口</a></li>
+                <li class="link-item"><a href="http://www.265.com/submit.html" target="_blank">谷歌265上网导航网站提交</a></li>
+                <li class="link-item"><a href="http://site.baidu.com/quality/quality_form.php" target="_blank">百度网址导航提交入口</a></li>
+                <li class="link-item"><a href="http://www.2345.com/help/submitweb.htm" target="_blank">2345网址导航申请收录入口</a></li>
+                <li class="link-item"><a href="https://feedback.discoverbing.com/default.aspx?locale=zh-CN&productkey=bingweb&scrx=1" target="_blank">必应网址导航提交</a></li>
+                <li class="link-item"><a href="http://123.sogou.com/about/shoulu.html" target="_blank">搜狗网址导航收录入口</a></li>
+                <li class="link-item"><a href="http://url.114la.com/" target="_blank">114啦网址收录</a></li>
+                <li class="link-item"><a href="http://123.duba.net/apply/" target="_blank">金山网址导航收录申请</a></li>
+                <li class="link-item"><a href="http://hao.rising.cn/catalog/slsq.html" target="_blank">瑞星网址导航收录申请</a></li>
+            </ul>
+        </section>
+        
+        <section id="wangguan" class="section">
+            <h2>网站管理员工具大全（搜索引擎）</h2>
+            <ul class="link-list">
+                <li class="link-item"><a href="http://www.google.com/webmasters/" target="_blank">Google网站管理员工具</a></li>
+                <li class="link-item"><a href="http://zhanzhang.baidu.com/" target="_blank">百度站长平台</a></li>
+                <li class="link-item"><a href="http://zhanzhang.so.com/" target="_blank">360搜索站长平台</a></li>
+                <li class="link-item"><a href="http://zhanzhang.sogou.com/" target="_blank">（新）搜狗站长平台</a></li>
+                <li class="link-item"><a href="http://www.bing.com/toolbox/webmaster/" target="_blank">Bing网站管理员工具</a></li>
+                <li class="link-item"><a href="http://zz.jike.com/" target="_blank">即刻搜索站长中心</a></li>
+                <li class="link-item"><a href="http://zhanzhang.anquan.org/" target="_blank">（新）安全联盟站长平台</a></li>
+                <li class="link-item"><a href="http://webmaster.yandex.com/" target="_blank">Yandex 网站管理工具</a></li>
+            </ul>
+        </section>
+        
+        <section id="kaifang" class="section">
+            <h2>开放平台注册应用大全</h2>
+            <ul class="link-list">
+                <li class="link-item"><a href="http://page.opensns.qq.com/apply.html" target="_blank">QQ空间认证</a></li>
+                <li class="link-item"><a href="http://help.sogou.com/renzheng/" target="_blank">搜狗官网认证</a></li>
+                <li class="link-item"><a href="http://guanwang.baidu.com/vcard/officialsite" target="_blank">百度官网认证</a></li>
+                <li class="link-item"><a href="http://zhanzhang.so.com/?m=SiteCertification&a=siteVerify" target="_blank">360官网认证</a></li>
+                <li class="link-item"><a href="http://open.discuz.net/" target="_blank">Discuz! 开放平台</a></li>
+                <li class="link-item"><a href="http://open.phpcms.cn/" target="_blank">PHPCMS开放平台</a></li>
+                <li class="link-item"><a href="http://open.soso.com/datacoop/bbs/submitbbs.html" target="_blank">搜搜论坛开放计划</a></li>
+                <li class="link-item"><a href="http://open.weibo.com/" target="_blank">新浪微博开放平台</a></li>
+                <li class="link-item"><a href="http://open.weixin.qq.com/" target="_blank">微信开放平台</a></li>
+                <li class="link-item"><a href="http://open.baidu.com/" target="_blank">百度开放平台</a></li>
+            </ul>
+        </section>
+        
+        <section id="sitemap" class="section">
+            <h2>向搜索引擎递交sitemap大全（网站地图）</h2>
+            <ul class="link-list">
+                <li class="link-item"><a href="http://open.soso.com/sitemap/" target="_blank">腾讯搜搜</a></li>
+                <li class="link-item"><a href="http://sitemap.baidu.com/" target="_blank">百度</a></li>
+                <li class="link-item"><a href="http://sitemap.cn.yahoo.com/" target="_blank">雅虎中国</a></li>
+                <li class="link-item"><a href="https://www.google.com/webmasters/tools/" target="_blank">Google</a></li>
+                <li class="link-item"><a href="http://webmaster.yandex.com/" target="_blank">Yandex</a></li>
+                <li class="link-item"><a href="http://www.bing.com/toolbox/webmaster/" target="_blank">Bing</a></li>
+                <li class="link-item"><a href="https://siteexplorer.search.yahoo.com/" target="_blank">Yahoo!</a></li>
+            </ul>
+        </section>
+        
+        <section id="tousu" class="section">
+            <h2>网站被K申诉通道</h2>
+            <ul class="link-list">
+                <li class="link-item"><a href="http://zhanzhang.baidu.com/feedback" target="_blank">百度网页申诉</a></li>
+                <li class="link-item"><a href="http://tousu.baidu.com/news/add/" target="_blank">百度新闻源投诉</a></li>
+                <li class="link-item"><a href="http://guanjia.qq.com/complaint.html" target="_blank">腾讯QQ电脑管家网站申诉</a></li>
+                <li class="link-item"><a href="http://www.google.com/webmasters/" target="_blank">Google网站申诉</a></li>
+                <li class="link-item"><a href="http://help.cn.yahoo.com/feedback.html?product=onesearch&source=1W5" target="_blank">雅虎网站申诉</a></li>
+                <li class="link-item"><a href="http://www.anquan.org/seccenter/appeal_verify/" target="_blank">知道创宇（Scanv）安全联盟申诉通道</a></li>
+                <li class="link-item"><a href="http://wd.360.cn/appeal/appeal.html" target="_blank">360网盾申诉</a></li>
+                <li class="link-item"><a href="http://info.so.360.cn/cache_remove.html" target="_blank">360网页快照删除申请</a></li>
+            </ul>
+        </section>
+        
+        <div class="update-date">
+            数据更新日期：2013.09.24
+        </div>
+    </div>
+    
+    <footer>
+        <p>搜索引擎登录入口大全 - 收集国内外最全的登录口</p>
+    </footer>
+</body>
+</html>

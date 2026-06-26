@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金米自动化设备解锁码生成器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #1abc9c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 100%);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--light);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 18px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tab.active {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .tab:not(.active):hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab i {
+            margin-right: 8px;
+        }
+        
+        .tab-content {
+            padding: 30px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--light);
+            font-size: 1.1rem;
+        }
+        
+        .input-container {
+            position: relative;
+        }
+        
+        .input-container i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            font-size: 1.1rem;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        input[type="text"].result {
+            background: rgba(26, 188, 156, 0.2);
+            font-weight: bold;
+            color: var(--accent);
+            padding-left: 15px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #16a085;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .notes {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        
+        .note {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .note i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .note.warning {
+            color: var(--warning);
+        }
+        
+        .note.info {
+            color: var(--secondary);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .tab {
+                padding: 15px 10px;
+                font-size: 1rem;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h1>金米自动化设备解锁码生成器</h1>
+            <p>东莞市金米(增利)自动化科技有限公司</p>
+        </div>
+        
+        <div class="card">
+            <div class="tabs">
+                <div class="tab active" data-tab="delay">
+                    <i class="fas fa-clock"></i> 延时解锁码
+                </div>
+                <div class="tab" data-tab="final">
+                    <i class="fas fa-unlock"></i> 终解锁码
+                </div>
+            </div>
+            
+            <!-- 延时解锁码表单 -->
+            <div id="delay-form" class="tab-content active">
+                <div class="form-group">
+                    <label for="delay-lock-code">锁机号码</label>
+                    <div class="input-container">
+                        <i class="fas fa-key"></i>
+                        <input type="text" id="delay-lock-code" maxlength="8" placeholder="请输入8位锁机号码">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="delay-result">延时30天解锁码</label>
+                    <input type="text" id="delay-result" class="result" readonly>
+                </div>
+                
+                <div class="buttons">
+                    <button class="btn btn-primary" id="delay-generate">
+                        <i class="fas fa-cogs"></i> 生成解锁码
+                    </button>
+                    <button class="btn btn-secondary" id="delay-reset">
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
+                </div>
+                
+                <div class="notes">
+                    <div class="note warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>此解锁码，延期为一个月</span>
+                    </div>
+                    <div class="note info">
+                        <i class="fas fa-info-circle"></i>
+                        <span>若求解终锁码，请至电厂商</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 终解锁码表单 -->
+            <div id="final-form" class="tab-content">
+                <div class="form-group">
+                    <label for="final-lock-code">锁机号码</label>
+                    <div class="input-container">
+                        <i class="fas fa-key"></i>
+                        <input type="text" id="final-lock-code" maxlength="8" placeholder="请输入8位锁机号码">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="final-result">设备终解锁码</label>
+                    <input type="text" id="final-result" class="result" readonly>
+                </div>
+                
+                <div class="buttons">
+                    <button class="btn btn-primary" id="final-generate">
+                        <i class="fas fa-cogs"></i> 生成解锁码
+                    </button>
+                    <button class="btn btn-secondary" id="final-reset">
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
+                </div>
+                
+                <div class="notes">
+                    <div class="note warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>此为终解锁码，请与上级沟通</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Powered by 增利自动化V1.2. All Rights Reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        // 选项卡切换功能
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有活动标签
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                // 添加当前活动标签
+                this.classList.add('active');
+                
+                // 隐藏所有内容
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // 显示当前内容
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(`${tabId}-form`).classList.add('active');
+            });
+        });
+        
+        // 补零函数
+        function paddingZero(str) {
+            while (str.length < 8) {
+                str = "0" + str;
+            }
+            return str;
+        }
+        
+        // 延时解锁码计算
+        document.getElementById('delay-generate').addEventListener('click', function() {
+            const lockCode = document.getElementById('delay-lock-code').value;
+            
+            if (!lockCode) {
+                alert("请填写锁机号码！");
+                document.getElementById('delay-lock-code').focus();
+                return;
+            }
+            
+            if (lockCode.length > 8) {
+                alert("请填写8位正确的锁机号码！");
+                document.getElementById('delay-lock-code').focus();
+                return;
+            }
+            
+            const paddedCode = paddingZero(lockCode);
+            const leftPart = paddedCode.substr(0, 4);
+            const rightPart = paddedCode.substr(4, 4);
+            
+            const result = leftPart * 287 + rightPart * 831 + 23934;
+            const paddedResult = paddingZero(result.toString());
+            
+            document.getElementById('delay-result').value = paddedResult;
+            document.getElementById('delay-lock-code').value = paddedCode;
+            
+            // 添加视觉反馈
+            this.innerHTML = '<i class="fas fa-check"></i> 生成成功';
+            this.style.background = 'var(--success)';
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-cogs"></i> 生成解锁码';
+                this.style.background = '';
+            }, 2000);
+        });
+        
+        // 终解锁码计算
+        document.getElementById('final-generate').addEventListener('click', function() {
+            const lockCode = document.getElementById('final-lock-code').value;
+            
+            if (!lockCode) {
+                alert("请填写锁机号码！");
+                document.getElementById('final-lock-code').focus();
+                return;
+            }
+            
+            if (lockCode.length > 8) {
+                alert("请填写8位正确的锁机号码！");
+                document.getElementById('final-lock-code').focus();
+                return;
+            }
+            
+            const paddedCode = paddingZero(lockCode);
+            const leftPart = paddedCode.substr(0, 4);
+            const rightPart = paddedCode.substr(4, 4);
+            
+            const result = leftPart * 287 + rightPart * 831 + 33042;
+            const paddedResult = paddingZero(result.toString());
+            
+            document.getElementById('final-result').value = paddedResult;
+            document.getElementById('final-lock-code').value = paddedCode;
+            
+            // 添加视觉反馈
+            this.innerHTML = '<i class="fas fa-check"></i> 生成成功';
+            this.style.background = 'var(--success)';
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-cogs"></i> 生成解锁码';
+                this.style.background = '';
+            }, 2000);
+        });
+        
+        // 重置功能
+        document.getElementById('delay-reset').addEventListener('click', function() {
+            document.getElementById('delay-lock-code').value = '';
+            document.getElementById('delay-result').value = '';
+            document.getElementById('delay-lock-code').focus();
+        });
+        
+        document.getElementById('final-reset').addEventListener('click', function() {
+            document.getElementById('final-lock-code').value = '';
+            document.getElementById('final-result').value = '';
+            document.getElementById('final-lock-code').focus();
+        });
+        
+        // 输入验证 - 只允许数字
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^\d]/g, '');
+            });
+        });
+        
+        // 添加动画效果
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.card').style.opacity = '0';
+            document.querySelector('.card').style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                document.querySelector('.card').style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                document.querySelector('.card').style.opacity = '1';
+                document.querySelector('.card').style.transform = 'translateY(0)';
+            }, 300);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🧮 口算小达人</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh; display: flex; justify-content: center; align-items: center;
+    padding: 10px; touch-action: manipulation;
+  }
+  .container {
+    background: white; border-radius: 20px; padding: 16px; max-width: 420px; width: 100%;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25); max-height: 95vh; overflow-y: auto;
+  }
+
+  /* 标题 */
+  h1 { text-align: center; color: #333; font-size: 20px; margin-bottom: 2px; }
+  .subtitle { text-align: center; color: #999; font-size: 12px; margin-bottom: 12px; }
+
+  /* 仪表盘 */
+  .dashboard {
+    display: flex; justify-content: space-between; background: #f5f7ff; border-radius: 12px;
+    padding: 8px 12px; margin-bottom: 12px; font-size: 13px;
+  }
+  .dash-item { text-align: center; flex: 1; }
+  .dash-item .label { color: #999; font-size: 10px; }
+  .dash-item .value { font-size: 18px; font-weight: bold; color: #333; margin-top: 1px; }
+  .dash-item .value.time { color: #e74c3c; }
+  .dash-item .value.score { color: #2ecc71; }
+  .dash-item .value.qnum { color: #667eea; }
+
+  /* 题目 */
+  .question-area { text-align: center; padding: 16px 0; min-height: 70px; }
+  .question-text { font-size: 32px; font-weight: bold; color: #333; letter-spacing: 2px; }
+  
+  /* 答案显示 */
+  .answer-display {
+    width: 120px; height: 52px; margin: 10px auto; background: #f8f9ff; border-radius: 14px;
+    border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: bold; color: #333; transition: 0.2s;
+  }
+  .answer-display.correct { border-color: #2ecc71; background: #eafaf1; color: #27ae60; }
+  .answer-display.wrong { border-color: #e74c3c; background: #fdedec; color: #e74c3c; animation: shake 0.3s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* 反馈 */
+  .feedback { height: 28px; line-height: 28px; font-size: 15px; font-weight: bold; }
+  .feedback.ok { color: #2ecc71; }
+  .feedback.ok::before { content: '✅ '; }
+  .feedback.err { color: #e74c3c; }
+  .feedback.err::before { content: '❌ '; }
+  .feedback.info { color: #667eea; }
+  .feedback.info::before { content: '💡 '; }
+
+  /* 数字键盘 */
+  .numpad {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0 4px;
+  }
+  .num-key {
+    height: 48px; border: none; border-radius: 10px; font-size: 22px; font-weight: bold;
+    cursor: pointer; transition: 0.1s; touch-action: manipulation; user-select: none;
+    background: #f0f0f5; color: #333;
+  }
+  .num-key:active { transform: scale(0.95); background: #ddd; }
+  .num-key.del { background: #ffe0d0; color: #e74c3c; font-size: 16px; }
+  .num-key.ok {
+    background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-size: 16px;
+  }
+  .num-key.clear { background: #fee8e8; color: #e74c3c; font-size: 14px; }
+
+  /* 结果页 */
+  .result-box { text-align: center; padding: 16px 0; }
+  .result-box .big-score { font-size: 52px; font-weight: bold; color: #667eea; }
+  .result-box .big-score.good { color: #2ecc71; }
+  .result-box .big-score.fail { color: #e74c3c; }
+  .result-box .stars { font-size: 30px; margin: 6px 0; }
+  .result-box .detail { color: #666; font-size: 13px; line-height: 1.7; }
+
+  /* 错题重做区 */
+  .wrong-review { margin-top: 10px; }
+  .wrong-review h3 { color: #e74c3c; font-size: 14px; margin-bottom: 6px; }
+  .wrong-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 10px; background: #fef0ef; border-radius: 8px; margin-bottom: 4px; font-size: 13px;
+  }
+  .wrong-item.corrected { background: #eafaf1; }
+
+  /* 开始页 */
+  .start-screen { text-align: center; padding: 24px 0; }
+  .start-screen .rules {
+    text-align: left; background: #f5f7ff; border-radius: 12px; padding: 12px;
+    margin: 10px 0; font-size: 13px; line-height: 1.7; color: #555;
+  }
+  .btn-start {
+    padding: 14px 40px; font-size: 18px; border: none; border-radius: 14px; cursor: pointer;
+    background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-weight: bold;
+    transition: 0.3s; margin-top: 8px; width: 100%;
+  }
+  .btn-start:active { transform: scale(0.97); }
+
+  .history { margin-top: 12px; padding-top: 10px; border-top: 1px solid #eee; }
+  .history h3 { font-size: 13px; color: #666; margin-bottom: 6px; cursor: pointer; }
+  .history-list { max-height: 160px; overflow-y: auto; font-size: 12px; }
+  .h-item {
+    display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f0f0f0;
+  }
+  .h-item .h-score { font-weight: bold; }
+  .clear-btn { font-size: 11px; color: #999; border: none; background: none; cursor: pointer; float: right; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+
+  <!-- ====== 开始页 ====== -->
+  <div id="pageStart" class="start-screen">
+    <h1>🧮 口算小达人</h1>
+    <p class="subtitle">100以内加减法</p>
+    <div class="rules">
+      📝 <strong>30题</strong> | ⏱️ <strong>20分钟</strong><br>
+      ✅ 答对→自动下一题<br>
+      ❌ 答错→提示后原地重做<br>
+      🔄 所有错题订正后才算通关
+    </div>
+    <button class="btn-start" onclick="startTest()">🚀 开始测试</button>
+    <div id="historyArea" class="history"></div>
+  </div>
+
+  <!-- ====== 测试页 ====== -->
+  <div id="pageTest" class="hidden">
+    <h1>🧮 口算小达人</h1>
+    <div class="dashboard">
+      <div class="dash-item"><div class="label">⏱️ 时间</div><div class="value time" id="timerDisplay">20:00</div></div>
+      <div class="dash-item"><div class="label">📊 得分</div><div class="value score" id="scoreDisplay">0</div></div>
+      <div class="dash-item"><div class="label">📝 进度</div><div class="value qnum" id="progressDisplay">1/30</div></div>
+    </div>
+
+    <div class="question-area">
+      <div class="question-text" id="questionText">12 + 35 = ?</div>
+      <div class="answer-display" id="answerDisplay">0</div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+
+    <!-- 数字键盘 -->
+    <div class="numpad">
+      <button class="num-key" onclick="pressNum(1)">1</button>
+      <button class="num-key" onclick="pressNum(2)">2</button>
+      <button class="num-key" onclick="pressNum(3)">3</button>
+      <button class="num-key" onclick="pressNum(4)">4</button>
+      <button class="num-key" onclick="pressNum(5)">5</button>
+      <button class="num-key" onclick="pressNum(6)">6</button>
+      <button class="num-key" onclick="pressNum(7)">7</button>
+      <button class="num-key" onclick="pressNum(8)">8</button>
+      <button class="num-key" onclick="pressNum(9)">9</button>
+      <button class="num-key clear" onclick="pressClear">C</button>
+      <button class="num-key" onclick="pressNum(0)">0</button>
+      <button class="num-key del" onclick="pressDel">⌫</button>
+    </div>
+    <button class="btn-start ok" id="confirmBtn" onclick="checkAnswer()">✅ 确认答案</button>
+
+    <!-- 错题重做 -->
+    <div id="wrongReview" class="wrong-review hidden"></div>
+  </div>
+
+  <!-- ====== 结果页 ====== -->
+  <div id="pageResult" class="hidden">
+    <div class="result-box">
+      <div class="big-score" id="finalScore">0</div>
+      <div style="font-size:13px;color:#999;">分</div>
+      <div class="stars" id="starsDisplay">⭐</div>
+      <div class="detail" id="resultDetail"></div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;">
+        <button class="btn-start" style="padding:12px 20px;font-size:15px;" onclick="startTest()">🔄 再来一次</button>
+        <button class="btn-start" style="padding:12px 20px;font-size:15px;background:linear-gradient(135deg,#95a5a6,#7f8c8d);" onclick="backToStart()">🏠 首页</button>
+      </div>
+    </div>
+    <div id="resultHistory" class="history"></div>
+  </div>
+
+</div>
+
+<script>
+// 音效（Web Audio API，无需外部文件）
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// 正确音效（愉快的上升音）
+function playCorrectSound() {
+  try {
+    const ctx = getAudioCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine';
+    g.gain.value = 0.15;
+    // C5 → E5 → G5 上升和弦
+    o.frequency.setValueAtTime(523, ctx.currentTime);
+    o.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+    o.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    o.start(ctx.currentTime);
+    o.stop(ctx.currentTime + 0.5);
+  } catch(e) {}
+}
+
+// 错误音效（低沉短促）
+function playWrongSound() {
+  try {
+    const ctx = getAudioCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(200, ctx.currentTime);
+    o.frequency.setValueAtTime(150, ctx.currentTime + 0.15);
+    g.gain.value = 0.1;
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    o.start(ctx.currentTime);
+    o.stop(ctx.currentTime + 0.3);
+  } catch(e) {}
+}
+
+// 完成音效（胜利旋律）
+function playWinSound() {
+  try {
+    const ctx = getAudioCtx();
+    const notes = [523, 659, 784, 1047]; // C5 E5 G5 C6
+    notes.forEach((freq, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sine';
+      o.frequency.value = freq;
+      g.gain.value = 0.12;
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*0.15 + 0.3);
+      o.start(ctx.currentTime + i*0.12);
+      o.stop(ctx.currentTime + i*0.12 + 0.3);
+    });
+  } catch(e) {}
+}
+
+// 表扬语
+const praises = [
+  '🌟 太棒了！', '👏 真厉害！', '🎉 真聪明！',
+  '💪 继续加油！', '⭐ 好样的！', '🏆 小天才！',
+  '✨ 非常棒！', '🎯 答对了！', '🌸 真优秀！',
+  '🚀 飞一般的速度！'
+];
+let lastPraise = -1;
+function getPraise() {
+  let idx;
+  do { idx = Math.floor(Math.random() * praises.length); } while (idx === lastPraise && praises.length > 1);
+  lastPraise = idx;
+  return praises[idx];
+}
+let S = {
+  questions: [], curIdx: 0, score: 0, timer: 1200, interval: null, running: false,
+  wrongList: [], retryMode: false, retryIdx: 0,
+  inputVal: '', waitingForNext: false,
+  history: JSON.parse(localStorage.getItem('mathHistory') || '[]'),
+};
+
+// ===== 生成题目 =====
+function genQ() {
+  const add = Math.random() > 0.35;
+  let a, b;
+  if (add) {
+    a = Math.floor(Math.random() * 91) + 1;
+    b = Math.floor(Math.random() * (101 - a)) + 1;
+  } else {
+    a = Math.floor(Math.random() * 90) + 10;
+    b = Math.floor(Math.random() * a) + 1;
+  }
+  return { a, b, op: add ? '+' : '-', ans: add ? a+b : a-b };
+}
+
+// ===== 数字键盘 =====
+function pressNum(n) {
+  if (S.waitingForNext) return;
+  const cur = document.getElementById('answerDisplay');
+  if (S.inputVal === '0') S.inputVal = '';
+  S.inputVal += n;
+  cur.textContent = S.inputVal;
+}
+
+function pressClear() {
+  S.inputVal = '';
+  document.getElementById('answerDisplay').textContent = '0';
+}
+
+function pressDel() {
+  if (S.waitingForNext) return;
+  S.inputVal = S.inputVal.slice(0, -1);
+  document.getElementById('answerDisplay').textContent = S.inputVal || '0';
+}
+
+// ===== 开始测试 =====
+function startTest() {
+  S.questions = []; for (let i = 0; i < 30; i++) S.questions.push(genQ());
+  S.curIdx = 0; S.score = 0; S.timer = 1200; S.running = true;
+  S.wrongList = []; S.retryMode = false; S.retryIdx = 0;
+  S.inputVal = ''; S.waitingForNext = false;
+
+  hide('pageStart'); hide('pageResult');
+  show('pageTest');
+  document.getElementById('wrongReview').classList.add('hidden');
+  document.getElementById('wrongReview').innerHTML = '';
+
+  showQ();
+  startTimer();
+}
+
+function showQ() {
+  const q = S.questions[S.curIdx];
+  document.getElementById('questionText').textContent = `${q.a} ${q.op} ${q.b} = ?`;
+  document.getElementById('answerDisplay').textContent = '0';
+  document.getElementById('answerDisplay').className = 'answer-display';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('confirmBtn').disabled = false;
+  document.getElementById('progressDisplay').textContent = `${S.curIdx+1}/30`;
+  document.getElementById('scoreDisplay').textContent = S.score;
+  S.inputVal = '';
+  S.waitingForNext = false;
+}
+
+// ===== 检查答案 =====
+function checkAnswer() {
+  if (!S.running || S.waitingForNext) return;
+  const val = parseInt(S.inputVal);
+  if (isNaN(val)) return;
+
+  const q = S.questions[S.curIdx];
+  const display = document.getElementById('answerDisplay');
+  const fb = document.getElementById('feedback');
+
+  if (val === q.ans) {
+    // ✅ 正确 → 显示正确→自动下一题
+    display.className = 'answer-display correct';
+    display.textContent = q.ans;
+    const praise = getPraise();
+    fb.textContent = '✅ ' + praise;
+    fb.className = 'feedback ok';
+    playCorrectSound();
+    S.score += 4; // 满分约120分→后面折算
+    document.getElementById('scoreDisplay').textContent = S.score;
+    S.waitingForNext = true;
+    setTimeout(() => {
+      S.curIdx++;
+      if (S.curIdx >= 30) afterAll();
+      else showQ();
+    }, 500);
+  } else {
+    // ❌ 错误 → 提示正确答案 → 原地重做
+    display.className = 'answer-display wrong';
+    fb.textContent = `✗ 正确答案是 ${q.ans}`;
+    fb.className = 'feedback err';
+    playWrongSound();
+    // 记录错题（不重复记录同一题）
+    if (!S.wrongList.find(w => w.a===q.a && w.b===q.b && w.op===q.op)) {
+      S.wrongList.push({...q});
+    }
+    // 2秒后重置，让用户重新做这一题
+    setTimeout(() => {
+      display.className = 'answer-display';
+      display.textContent = '0';
+      fb.textContent = '💡 再试一次！';
+      fb.className = 'feedback info';
+      S.inputVal = '';
+    }, 1500);
+  }
+}
+
+// ===== 30题做完后 =====
+function afterAll() {
+  if (S.wrongList.length === 0) {
+    finishTest();
+  } else {
+    startRetry();
+  }
+}
+
+// ===== 错题重做 =====
+function startRetry() {
+  S.retryMode = true;
+  S.retryIdx = 0;
+  const wArea = document.getElementById('wrongReview');
+  wArea.classList.remove('hidden');
+
+  let html = '<h3>📋 错题订正（' + S.wrongList.length + '题）</h3>';
+  S.wrongList.forEach((q, i) => {
+    html += `<div class="wrong-item ${q.corrected?'corrected':''}">
+      <span>${q.corrected?'✅':'⏳'} ${q.a} ${q.op} ${q.b} = ${q.ans}</span>
+      <span>${q.corrected?'已订正':'待重做'}</span>
+    </div>`;
+  });
+  // 注入题目区
+  html += '<div id="retryArea" style="text-align:center;padding:10px 0;border-top:1px solid #eee;margin-top:8px;"></div>';
+  wArea.innerHTML = html;
+
+  // 隐藏主题目区，显示错题区
+  document.querySelector('.question-area').style.display = 'none';
+  document.querySelector('.numpad').style.display = 'none';
+  document.getElementById('confirmBtn').style.display = 'none';
+  showRetryQ();
+}
+
+function showRetryQ() {
+  // 找第一个未订正
+  let idx = -1;
+  for (let i = 0; i < S.wrongList.length; i++) {
+    if (!S.wrongList[i].corrected) { idx = i; break; }
+  }
+  if (idx === -1) { finishTest(); return; }
+
+  S.retryIdx = idx;
+  const q = S.wrongList[idx];
+  const area = document.getElementById('retryArea');
+  
+  area.innerHTML = `
+    <div style="font-size:13px;color:#e74c3c;margin-bottom:4px;">🔁 第${idx+1}题</div>
+    <div style="font-size:28px;font-weight:bold;margin:6px 0;">${q.a} ${q.op} ${q.b} = ?</div>
+    <div class="answer-display" id="retryDisplay">0</div>
+    <div class="feedback" id="retryFb"></div>
+    <div class="numpad" style="max-width:280px;margin:6px auto;">
+      ${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="num-key" onclick="retryNum(${n})">${n}</button>`).join('')}
+      <button class="num-key clear" onclick="retryClear()">C</button>
+      <button class="num-key" onclick="retryNum(0)">0</button>
+      <button class="num-key del" onclick="retryDel()">⌫</button>
+    </div>
+    <button class="btn-start" style="padding:10px;font-size:15px;margin-top:4px;" onclick="checkRetry()">✅ 确认答案</button>
+  `;
+  S.retryInput = '';
+  document.getElementById('retryDisplay').textContent = '0';
+  document.getElementById('retryFb').textContent = '';
+  document.getElementById('retryFb').className = 'feedback';
+}
+
+function retryNum(n) {
+  if (S.retryInput === undefined) S.retryInput = '';
+  S.retryInput += n;
+  document.getElementById('retryDisplay').textContent = S.retryInput;
+}
+function retryClear() { S.retryInput = ''; document.getElementById('retryDisplay').textContent = '0'; }
+function retryDel() { S.retryInput = (S.retryInput||'').slice(0,-1); document.getElementById('retryDisplay').textContent = S.retryInput || '0'; }
+
+function checkRetry() {
+  const val = parseInt(S.retryInput);
+  if (isNaN(val)) return;
+  const q = S.wrongList[S.retryIdx];
+  const fb = document.getElementById('retryFb');
+  const display = document.getElementById('retryDisplay');
+
+  if (val === q.ans) {
+    display.className = 'answer-display correct';
+    fb.textContent = '✅ 订正成功！';
+    fb.className = 'feedback ok';
+    playCorrectSound();
+    q.corrected = true;
+    S.score += 2;
+    document.getElementById('scoreDisplay').textContent = S.score;
+
+    // 更新列表状态
+    const items = document.querySelectorAll('.wrong-item');
+    if (items[S.retryIdx]) {
+      items[S.retryIdx].className = 'wrong-item corrected';
+      items[S.retryIdx].innerHTML = `<span>✅ ${q.a} ${q.op} ${q.b} = ${q.ans}</span><span>已订正</span>`;
+    }
+
+    setTimeout(() => showRetryQ(), 600);
+  } else {
+    display.className = 'answer-display wrong';
+    fb.textContent = `✗ 不对，正确答案是 ${q.ans}`;
+    fb.className = 'feedback err';
+    setTimeout(() => {
+      display.className = 'answer-display';
+      display.textContent = '0';
+      fb.textContent = '💡 再想想';
+      fb.className = 'feedback info';
+      S.retryInput = '';
+    }, 1500);
+  }
+}
+
+// ===== 计时器 =====
+function startTimer() {
+  clearInterval(S.interval);
+  upTime();
+  S.interval = setInterval(() => {
+    S.timer--;
+    upTime();
+    if (S.timer <= 0) {
+      clearInterval(S.interval); S.running = false;
+      alert('⏰ 时间到！');
+      finishTest();
+    }
+  }, 1000);
+}
+function upTime() {
+  const m = Math.floor(S.timer/60), s = S.timer%60;
+  const el = document.getElementById('timerDisplay');
+  el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.style.color = S.timer <= 60 ? '#e74c3c' : S.timer <= 300 ? '#e67e22' : '#e74c3c';
+}
+
+// ===== 完成 =====
+function finishTest() {
+  clearInterval(S.interval); S.running = false;
+  const used = 1200 - S.timer;
+  const raw = Math.min(100, Math.round(S.score * 100 / 120));
+  const timeStr = `${Math.floor(used/60)}分${used%60}秒`;
+  const wc = S.wrongList.filter(q => !q.corrected).length;
+  const rc = 30 - S.wrongList.length;
+
+  const stars = raw >= 95 ? '⭐⭐⭐' : raw >= 80 ? '⭐⭐' : '⭐';
+  const comment = raw >= 95 ? '🏆 满分小达人！🎉🎉🎉' : raw >= 80 ? '💪 表现不错！继续加油！' : raw >= 60 ? '📚 还需努力，多练练！' : '🌟 加油，下次一定更好！';
+  if (raw >= 80) { setTimeout(playWinSound, 300); }
+  
+  // 保存历史
+  S.history.unshift({
+    date: new Date().toLocaleString(), score: raw, time: timeStr,
+    right: rc, wrong: S.wrongList.length
+  });
+  if (S.history.length > 50) S.history = S.history.slice(0,50);
+  localStorage.setItem('mathHistory', JSON.stringify(S.history));
+
+  hide('pageTest'); show('pageResult');
+  const fs = document.getElementById('finalScore');
+  fs.textContent = raw;
+  fs.className = 'big-score ' + (raw>=80?'good':'fail');
+  document.getElementById('starsDisplay').textContent = stars;
+  document.getElementById('resultDetail').innerHTML =
+    `⏱️ ${timeStr} | ✅ ${rc}题 | ❌ ${S.wrongList.length}题<br>${comment}`;
+
+  renderHistory();
+  document.getElementById('resultHistory').innerHTML = document.getElementById('historyArea').innerHTML;
+}
+
+// ===== 历史 =====
+function renderHistory() {
+  const area = document.getElementById('historyArea');
+  if (!S.history.length) {
+    area.innerHTML = '<div class="history"><h3>📊 历史记录</h3><div style="text-align:center;color:#bbb;padding:8px;">暂无记录</div></div>';
+    return;
+  }
+  let html = '<div class="history"><h3>📊 历史记录 <button class="clear-btn" onclick="clearHist()">清空</button></h3><div class="history-list">';
+  S.history.slice(0,15).forEach(h => {
+    html += `<div class="h-item">
+      <span>${h.date}</span>
+      <span>${h.right}/30题</span>
+      <span class="h-score" style="color:${h.score>=80?'#2ecc71':'#e74c3c'}">${h.score}分</span>
+      <span style="color:#999;font-size:11px;">${h.time}</span>
+    </div>`;
+  });
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+function clearHist() { if(!confirm('清空所有记录？')) return; S.history=[]; localStorage.removeItem('mathHistory'); renderHistory(); }
+function backToStart() { hide('pageResult'); hide('pageTest'); show('pageStart'); renderHistory(); }
+function hide(id) { document.getElementById(id).classList.add('hidden'); }
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+
+// ===== 初始化 =====
+window.onload = renderHistory;
+</script>
+</body>
+</html>

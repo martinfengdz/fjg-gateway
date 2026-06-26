@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>奇艺科技 - 智能导航网站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 头部样式 */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .time-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        #current-time {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #4a5568;
+        }
+        
+        #current-year {
+            font-size: 1.2rem;
+            color: #718096;
+        }
+        
+        /* 问候语样式 */
+        .greeting {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+        
+        .greeting.show {
+            display: block;
+        }
+        
+        .greeting.hidden {
+            display: none;
+        }
+        
+        .greeting-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .greeting-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        #greeting-text {
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+        
+        /* 搜索栏样式 */
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .search-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .search-tab {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            background: #f7fafc;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .search-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-btn {
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .search-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        /* 主标签样式 */
+        .main-tabs {
+            display: flex;
+            background: white;
+            border-radius: 15px 15px 0 0;
+            overflow-x: auto;
+            padding: 0 20px;
+        }
+        
+        .main-tab {
+            padding: 20px 30px;
+            border: none;
+            background: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            white-space: nowrap;
+            position: relative;
+        }
+        
+        .main-tab.active {
+            color: #667eea;
+        }
+        
+        .main-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #667eea;
+        }
+        
+        /* 内容区样式 */
+        .content-section {
+            background: white;
+            border-radius: 0 0 15px 15px;
+            padding: 30px;
+            min-height: 500px;
+        }
+        
+        .links-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .link-item {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .link-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .link-item a {
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 1.1rem;
+            display: block;
+        }
+        
+        .link-item a:hover {
+            color: #667eea;
+        }
+        
+        .link-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+        
+        .btn-secondary {
+            background: #718096;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ed8936;
+            color: white;
+        }
+        
+        /* 控制栏样式 */
+        .control-section {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        /* 通知样式 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            min-width: 300px;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            display: block;
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            border-left: 4px solid #48bb78;
+        }
+        
+        .notification.error {
+            border-left: 4px solid #f56565;
+        }
+        
+        .notification.warning {
+            border-left: 4px solid #ed8936;
+        }
+        
+        .notification.info {
+            border-left: 4px solid #4299e1;
+        }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #718096;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            min-width: 400px;
+            max-width: 500px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #718096;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4a5568;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        /* 动画 */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .time-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            #current-time {
+                font-size: 1.8rem;
+            }
+            
+            .main-tabs {
+                overflow-x: auto;
+                padding: 0 10px;
+            }
+            
+            .main-tab {
+                padding: 15px 20px;
+                font-size: 1rem;
+            }
+            
+            .content-section {
+                padding: 20px;
+            }
+            
+            .links-container {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            .modal-content {
+                min-width: 90%;
+                margin: 0 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="time-section">
+                <div>
+                    <div id="current-time">正在加载时间...</div>
+                    <div>© <span id="current-year">2026</span> 奇艺科技 - 智能导航</div>
+                </div>
+                <div class="control-section">
+                    <button id="set-homepage" class="btn btn-success">设为主页</button>
+                    <button id="refresh-page" class="btn btn-warning">刷新页面</button>
+                    <button id="toggle-permission" class="btn btn-warning">🔒 解锁管理</button>
+                </div>
+            </div>
+            
+            <!-- 问候语 -->
+            <div id="greeting" class="greeting hidden">
+                <div class="greeting-header">
+                    <h3>📢 智能问候</h3>
+                    <button id="greeting-close" class="greeting-close">×</button>
+                </div>
+                <div id="greeting-text">正在生成问候语...</div>
+            </div>
+            
+            <!-- 搜索栏 -->
+            <div class="search-section">
+                <div class="search-tabs">
+                    <button class="search-tab active" data-tab="web">网页</button>
+                    <button class="search-tab" data-tab="news">新闻</button>
+                    <button class="search-tab" data-tab="mp3">音乐</button>
+                    <button class="search-tab" data-tab="video">视频</button>
+                    <button class="search-tab" data-tab="image">图片</button>
+                    <button class="search-tab" data-tab="map">地图</button>
+                    <button class="search-tab" data-tab="qa">问答</button>
+                    <button class="search-tab" data-tab="shopping">购物</button>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" class="search-input" value="请输入搜索关键词..." placeholder="请输入搜索关键词...">
+                    <button class="search-btn">百度一下</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主标签 -->
+        <div class="main-tabs">
+            <button class="main-tab active" data-tab="recommended">推荐</button>
+            <button class="main-tab" data-tab="proxy">代理</button>
+            <button class="main-tab" data-tab="internal">内部</button>
+            <button class="main-tab" data-tab="software">软件</button>
+            <button class="main-tab" data-tab="business">商务</button>
+            <button class="main-tab" data-tab="common">常用</button>
+            <button class="main-tab" data-tab="finance">金融</button>
+            <button class="main-tab" data-tab="work">工作</button>
+            <button class="main-tab" data-tab="side">副业/AI</button>
+        </div>
+        
+        <!-- 内容区 -->
+        <div class="content-section">
+            <div id="recommended-links" class="links-container">
+                <!-- 推荐链接会动态加载 -->
+            </div>
+            <div id="proxy-links" class="links-container" style="display: none;"></div>
+            <div id="internal-links" class="links-container" style="display: none;"></div>
+            <div id="software-links" class="links-container" style="display: none;"></div>
+            <div id="business-links" class="links-container" style="display: none;"></div>
+            <div id="common-links" class="links-container" style="display: none;"></div>
+            <div id="finance-links" class="links-container" style="display: none;"></div>
+            <div id="work-links" class="links-container" style="display: none;"></div>
+            <div id="side-links" class="links-container" style="display: none;"></div>
+            
+            <div class="control-section">
+                <button id="add-link-btn" class="btn btn-success" disabled>添加网址</button>
+                <button id="export-data" class="btn btn-secondary">导出数据</button>
+                <button class="add-link-btn btn btn-success" data-tab="recommended" disabled>在此分类添加</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 通知 -->
+    <div id="notification" class="notification">
+        <div class="notification-header">
+            <strong>通知</strong>
+            <button id="notification-close" class="notification-close">×</button>
+        </div>
+        <div id="notification-text">通知内容</div>
+    </div>
+    
+    <!-- 添加/编辑网址模态框 -->
+    <div id="link-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">添加网址</h3>
+                <button id="modal-close" class="modal-close">×</button>
+            </div>
+            <form id="link-form">
+                <input type="hidden" id="link-index" value="">
+                <div class="form-group">
+                    <label for="link-name">网站名称</label>
+                    <input type="text" id="link-name" required placeholder="例如：百度">
+                </div>
+                <div class="form-group">
+                    <label for="link-url">网站地址</label>
+                    <input type="url" id="link-url" required placeholder="https://www.baidu.com">
+                </div>
+                <div class="form-group">
+                    <label for="link-category">分类</label>
+                    <select id="link-category" required>
+                        <option value="recommended">推荐</option>
+                        <option value="proxy">代理</option>
+                        <option value="internal">内部</option>
+                        <option value="software">软件</option>
+                        <option value="business">商务</option>
+                        <option value="common">常用</option>
+                        <option value="finance">金融</option>
+                        <option value="work">工作</option>
+                        <option value="side">副业/AI</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="link-color">颜色样式（可选）</label>
+                    <select id="link-color">
+                        <option value="">默认</option>
+                        <option value="important">重要（红色）</option>
+                        <option value="warning">警告（橙色）</option>
+                        <option value="success">成功（绿色）</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancel-btn" class="btn btn-secondary">取消</button>
+                    <button type="submit" class="btn btn-success">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 权限验证模态框 -->
+    <div id="permission-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>管理权限验证</h3>
+                <button id="permission-modal-close" class="modal-close">×</button>
+            </div>
+            <div class="form-group">
+                <label for="permission-password">请输入管理密码</label>
+                <input type="password" id="permission-password" placeholder="默认密码：admin123" autofocus>
+            </div>
+            <div class="form-actions">
+                <button type="button" id="cancel-permission" class="btn btn-secondary">取消</button>
+                <button type="button" id="confirm-permission" class="btn btn-success">验证</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 修改密码模态框 -->
+    <div id="change-password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>修改管理密码</h3>
+                <button id="change-password-modal-close" class="modal-close">×</button>
+            </div>
+            <div class="form-group">
+                <label for="current-password">当前密码</label>
+                <input type="password" id="current-password" placeholder="请输入当前密码">
+            </div>
+            <div class="form-group">
+                <label for="new-password">新密码</label>
+                <input type="password" id="new-password" placeholder="请输入新密码（至少6位）">
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">确认新密码</label>
+                <input type="password" id="confirm-password" placeholder="请再次输入新密码">
+            </div>
+            <div class="form-actions">
+                <button type="button" id="cancel-change-password" class="btn btn-secondary">取消</button>
+                <button type="button" id="confirm-change-password" class="btn btn-success">确认修改</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 导入数据模态框 -->
+    <div id="import-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>导入数据</h3>
+                <button id="import-modal-close" class="modal-close">×</button>
+            </div>
+            <div class="form-group">
+                <label for="import-data">请输入JSON格式的数据</label>
+                <textarea id="import-data" rows="10" placeholder="请粘贴JSON格式的数据..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" id="cancel-import" class="btn btn-secondary">取消</button>
+                <button type="button" id="confirm-import" class="btn btn-success">导入</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 权限管理相关变量
+        let hasPermission = false;
+        let permissionTimeout = null;
+        const PERMISSION_DURATION = 30 * 60 * 1000; // 30分钟
+
+        // 时间显示功能
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                weekday: 'short'
+            });
+            document.getElementById('current-time').textContent = timeString;
+        }
+
+        // 智能问候语功能
+        function updateGreeting() {
+            const now = new Date();
+            const hour = now.getHours();
+            const greetingElement = document.getElementById('greeting-text');
+            let greeting = '';
+            
+            if (hour >= 5 && hour < 9) {
+                greeting = '🌅 早上好！新的一天开始了，祝您工作愉快！';
+            } else if (hour >= 9 && hour < 12) {
+                greeting = '☀️ 上午好！工作顺利吗？需要我帮您查找什么吗？';
+            } else if (hour >= 12 && hour < 14) {
+                greeting = '🍱 中午好！记得适当休息，保持精力充沛！';
+            } else if (hour >= 14 && hour < 18) {
+                greeting = '💼 下午好！继续加油，高效完成工作！';
+            } else if (hour >= 18 && hour < 22) {
+                greeting = '🌙 晚上好！工作辛苦了，注意劳逸结合！';
+            } else {
+                greeting = '🌜 夜深了，注意休息，保持健康的工作生活平衡！';
+            }
+            
+            // 添加智能提示
+            const dayOfWeek = now.getDay();
+            if (dayOfWeek === 1) { // 周一
+                greeting += ' 新的一周开始了，祝您工作顺利！';
+            } else if (dayOfWeek === 5) { // 周五
+                greeting += ' 周末即将来临，提前祝您周末愉快！';
+            }
+            
+            // 检查是否节假日
+            const month = now.getMonth() + 1;
+            const date = now.getDate();
+            if ((month === 1 && date === 1) || (month === 5 && date === 1) || 
+                (month === 10 && (date >= 1 && date <= 7))) {
+                greeting += ' 节日快乐！';
+            }
+            
+            greetingElement.textContent = greeting;
+            
+            // 显示问候语（如果之前没有隐藏）
+            const greetingContainer = document.getElementById('greeting');
+            if (!localStorage.getItem('greetingHidden')) {
+                greetingContainer.classList.remove('hidden');
+                greetingContainer.classList.add('show');
+                
+                // 5秒后自动隐藏
+                setTimeout(() => {
+                    hideGreeting();
+                }, 5000);
+            }
+        }
+
+        // 隐藏问候语
+        function hideGreeting() {
+            const greetingContainer = document.getElementById('greeting');
+            greetingContainer.classList.add('hidden');
+            greetingContainer.classList.remove('show');
+            localStorage.setItem('greetingHidden', 'true');
+        }
+
+        // 设置当前年份
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // 通知功能
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notificationText.textContent = message;
+            
+            // 移除所有类型类
+            const types = ['success', 'error', 'warning', 'info'];
+            types.forEach(t => {
+                notification.classList.remove(t);
+            });
+            
+            // 添加当前类型类
+            notification.classList.add(type);
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        document.getElementById('notification-close').addEventListener('click', function() {
+            document.getElementById('notification').classList.remove('show');
+        });
+
+        // 设为主页功能
+        document.getElementById('set-homepage').addEventListener('click', function() {
+            try {
+                this.style.behavior = 'url(#default#homepage)';
+                this.setHomePage('http://192.168.31.118');
+                showNotification('主页设置成功！', 'success');
+            } catch(e) {
+                showNotification('您的浏览器不支持自动设置主页，请手动设置。', 'warning');
+            }
+        });
+
+        // 刷新页面
+        document.getElementById('refresh-page').addEventListener('click', function() {
+            // 清除问候语隐藏状态，使下次刷新时显示
+            localStorage.removeItem('greetingHidden');
+            location.reload();
+        });
+
+        // 搜索标签切换
+        const searchTabs = document.querySelectorAll('.search-tab');
+        searchTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                searchTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 更新搜索按钮文本
+                const buttonTexts = {
+                    'web': '百度一下',
+                    'news': '搜索新闻',
+                    'mp3': '搜索音乐',
+                    'video': '搜索视频',
+                    'image': '搜索图片',
+                    'map': '搜索地图',
+                    'qa': '搜索问答',
+                    'shopping': '搜索商品'
+                };
+                
+                document.querySelector('.search-btn').textContent = buttonTexts[this.dataset.tab] || '搜索';
+            });
+        });
+
+        // 搜索功能
+        document.querySelector('.search-btn').addEventListener('click', function() {
+            const searchInput = document.querySelector('.search-input');
+            const searchTerm = searchInput.value.trim();
+            
+            if (!searchTerm || searchTerm === '请输入搜索关键词...') {
+                showNotification('请输入搜索关键词', 'warning');
+                searchInput.focus();
+                return;
+            }
+            
+            const activeTab = document.querySelector('.search-tab.active');
+            const searchType = activeTab ? activeTab.dataset.tab : 'web';
+            
+            const searchUrls = {
+                'web': `https://www.baidu.com/s?wd=${encodeURIComponent(searchTerm)}`,
+                'news': `https://news.baidu.com/ns?word=${encodeURIComponent(searchTerm)}`,
+                'mp3': `https://mp3.baidu.com/m?ie=utf-8&ct=134217728&word=${encodeURIComponent(searchTerm)}`,
+                'video': `https://video.baidu.com/v?ct=301989888&word=${encodeURIComponent(searchTerm)}`,
+                'image': `https://image.baidu.com/search/index?tn=baiduimage&word=${encodeURIComponent(searchTerm)}`,
+                'map': `https://map.baidu.com/?newmap=1&qt=s&wd=${encodeURIComponent(searchTerm)}`,
+                'qa': `https://zhidao.baidu.com/search?word=${encodeURIComponent(searchTerm)}`,
+                'shopping': `https://search8.taobao.com/browse/search_auction.htm?q=${encodeURIComponent(searchTerm)}`
+            };
+            
+            const url = searchUrls[searchType] || searchUrls['web'];
+            window.open(url, '_blank');
+            
+            showNotification(`正在搜索: ${searchTerm}`, 'success');
+        });
+
+        // 主标签切换
+        const mainTabs = document.querySelectorAll('.main-tab');
+        const linkContainers = document.querySelectorAll('.links-container');
+
+        mainTabs.forEach((tab, index) => {
+            tab.addEventListener('click', function() {
+                mainTabs.forEach(t => t.classList.remove('active'));
+                linkContainers.forEach(c => c.style.display = 'none');
+                
+                this.classList.add('active');
+                linkContainers[index].style.display = 'grid';
+                
+                // 更新添加按钮的data-tab属性
+                document.querySelector('.add-link-btn').dataset.tab = this.dataset.tab;
+                
+                // 加载对应标签的数据
+                loadTabData(this.dataset.tab);
+            });
+        });
+
+        // 链接数据
+        let linkData = {
+            recommended: [
+                {name: "腾讯", url: "http://www.qq.com/", class: ""},
+                {name: "网易", url: "http://www.163.com/", class: ""},
+                {name: "搜狐", url: "http://www.sohu.com/", class: ""},
+                {name: "新浪", url: "http://www.sina.com.cn/", class: ""},
+                {name: "凤凰网", url: "http://www.ifeng.com/", class: ""},
+                {name: "央视网", url: "http://www.cntv.cn/", class: ""},
+                {name: "中国移动", url: "http://10086.cn/", class: ""},
+                {name: "人民网", url: "http://www.people.com.cn/", class: ""},
+                {name: "农业银行", url: "http://www.95599.cn/cn/", class: ""},
+                {name: "东莞农商银行", url: "http://www.drcbank.com/", class: ""},
+                {name: "中国银行", url: "http://www.boc.cn/", class: ""},
+                {name: "Excel Home", url: "http://club.excelhome.net/", class: ""},
+                {name: "Access中国", url: "http://www.access-cn.com/?fromuid=227441", class: ""},
+                {name: "火车票", url: "http://www.12306.cn/", class: ""},
+                {name: "facebook", url: "https://www.facebook.com/", class: ""},
+                {name: "黑罐头", url: "https://www.heycan.com/", class: ""},
+                {name: "中国人寿", url: "http://www.chinalife.com.cn/", class: ""},
+                {name: "海外TK", url: "https://www.tiktok.com/", class: ""},
+                {name: "今日头条", url: "https://mp.toutiao.com", class: ""},
+                {name: "花生壳", url: "https://www.oray.com/", class: ""},
+                {name: "优课星球", url: "https://pc.ukxq.com/#/", class: ""},
+                {name: "海洋学院", url: "https://www.weitianxia.club/student/studentLogin", class: ""},
+                {name: "支付牌照", url: "http://www.pbc.gov.cn/zhengwugongkai/4081330/4081344/4081407/index.html", class: ""},
+                {name: "微软电脑管家", url: "https://pcmanager.microsoft.com/zh-cn", class: ""},
+                {name: "淘宝网", url: "https://www.taobao.com/", class: ""},
+                {name: "闲鱼网", url: "https://www.goofish.com/", class: ""},
+                {name: "晨枫u盘", url: "http://www.myfeng.cn/", class: ""},
+                {name: "翻译", url: "https://fanyi.baidu.com/?aldtype=85#zh/en/", class: ""},
+            ],
+            proxy: [
+                {name: "微商通系统", url: "http://www.mywst.com/", class: ""},
+                {name: "营销系统", url: "http://cms.dlszyht.com/", class: ""},
+                {name: "爱奇艺号", url: "https://mp.iqiyi.com/", class: ""},
+                {name: "企鹅号", url: "https://om.qq.com/userAuth/index", class: ""},
+                {name: "大鱼号", url: "https://mp.dayu.com/", class: ""},
+                {name: "百家号", url: "https://baijiahao.baidu.com/", class: ""},
+                {name: "头条号", url: "https://mp.toutiao.com/", class: ""},
+                {name: "网易号", url: "https://mp.163.com/", class: ""},
+                {name: "趣头条号", url: "https://mp.qutoutiao.net/", class: ""},
+                {name: "惠头条号", url: "http://mp.cashtoutiao.com/", class: ""},
+                {name: "新浪看点号", url: "http://mp.sina.com.cn/", class: ""},
+                {name: "哗哩哗哩号", url: "https://member.bilibili.com/", class: ""},
+                {name: "视频号助手", url: "https://channels.weixin.qq.com/", class: ""},
+                {name: "微信公众平台客服", url: "https://mpkf.weixin.qq.com/", class: ""},
+                {name: "微信公众平台", url: "https://weixin.qq.com/", class: ""},
+                {name: "抖店", url: "https://fxg.jinritemai.com", class: ""},
+                {name: "新区云", url: "https://www.xinquyun.com/aff/PXPEZJCS", class: "19538756825"},
+                {name: "U钙网LOGO", url: "http://www.uugai.com/", class: ""},
+                {name: "IP检测1", url: "https://ipip.la/", class: ""},
+                {name: "IP检测2", url: "https://www.itdog.cn/", class: ""},
+                {name: "收钱吧商家", url: "https://s.shouqianba.com/login", class: ""},
+                {name: "微信服务商", url: "https://fuwu.weixin.qq.com/", class: ""},
+                {name: "收钱吧掌柜", url: "http://sales-web.shouqianba.com", class: ""},
+            ],
+            internal: [
+                {name: "去哪儿网", url: "http://www.qunar.com/", class: ""},
+                {name: "企业公示系统", url: "http://www.gsxt.gov.cn/", class: ""},
+                {name: "启信宝查询平台", url: "http://www.qixin.com/", class: ""},
+                {name: "天眼查查询平台", url: "https://www.tianyancha.com/", class: ""},
+                {name: "百度企业信用", url: "https://xin.baidu.com/", class: ""},
+                {name: "花生壳", url: "http://www.oray.com/", class: ""},
+                 {name: "顺丰速运", url: "https://v.sf-express.com/", class: ""},
+                {name: "简书", url: "https://www.jianshu.com/", class: ""},
+                {name: "MfcClub", url: "https://www.mfcclub.com/login.jsp", class: ""},
+                {name: "智能报表", url: "http://gcdn.gcpowertools.com.cn/", class: ""},
+                {name: "喜马拉雅", url: "https://www.ximalaya.com/", class: ""},
+                {name: "劝学网", url: "http://www.quanxue.cn/", class: ""},
+                {name: "阿里云", url: "https://beian.aliyun.com/", class: ""},
+                {name: "志愿者联合会", url: "https://www.izyz.org/", class: ""},
+                {name: "网站管理", url: "https://ac.wezhan.cn/login", class: ""},
+                {name: "139邮箱", url: "http://mail.10086.cn/", class: ""},
+                {name: "设备解锁", url: "Unlock.html", class: ""},
+                {name: "货拉拉", url: "https://e.huolala.cn/", class: ""},
+                {name: "企业微信", url: "https://work.weixin.qq.com/", class: ""},
+                {name: "BOSS直聘", url: "https://www.zhipin.com/", class: ""},
+            ],
+            software: [
+                {name: "蒲公英", url: "https://pgy.oray.com/download/", class: ""},
+                {name: "易企秀", url: "http://eqxiu.com/home", class: ""},
+                {name: "购物知识", url: "http://www.goomai.cn/", class: ""},
+                {name: "米聊公众平台", url: "http://vip.miliao.com/", class: ""},
+                {name: "易信公众平台", url: "https://plus.yixin.im//", class: ""},
+                {name: "正版系统", url: "http://msdn.itellyou.cn/?lang=zh-cn", class: ""},
+                {name: "QQ五笔输入法", url: "http://wubi.qq.com/", class: ""},
+                {name: "myQNAPcloud", url: "https://www.qnap.com/en/utilities", class: ""},
+                {name: "微信公众平台", url: "http://mp.weixin.qq.com/", class: ""},
+                {name: "熊猫办公", url: "https://www.tukuppt.com/", class: ""},
+                {name: "千库网", url: "https://588ku.com/", class: ""},
+                {name: "工图网", url: "https://www.900ppt.com/", class: ""},
+                {name: "图品汇", url: "https://www.88tph.com/", class: ""},
+                {name: "稿定设计", url: "https://www.gaoding.com/", class: ""},
+                {name: "觅元素", url: "https://www.51yuansu.com/", class: ""},
+                {name: "风云设计", url: "http://www.ppt118.com/", class: ""},
+                {name: "90设计", url: "https://90sheji.com/", class: ""},
+                {name: "千图网", url: "https://www.58pic.com/", class: ""},
+                {name: "熊猫办公", url: "https://www.tukuppt.com/", class: ""},
+                {name: "摄图网", url: "https://699pic.com/", class: ""},
+                {name: "包图网", url: "https://ibaotu.com/", class: ""},
+                {name: "直播中控", url: "https://buyin.jinritemai.com/", class: ""},
+                {name: "抖音来客", url: "https://life.douyin.com/", class: ""},
+                {name: "抖音创作服务平台", url: "https://creator.douyin.com/", class: ""},
+                {name: "巨量百应", url: "https://buyin.jinritemai.com/", class: ""},
+                {name: "巨量云图台", url: "https://business.oceanengine.com/", class: ""},
+            ],
+            business: [
+                {name: "熊猫办公", url: "https://www.tukuppt.com/", class: ""},
+                {name: "投资项目", url: "https://tzxm.gd.gov.cn/", class: ""},
+                {name: "群志SRM系统", url: "http://srm.innolux.com/", class: ""},
+                {name: "群创厂商", url: "http://nhvp.innolux.com:9080/Vendor/jsp/home/login.jsp", class: ""},
+                {name: "周易雅说", url: "https://h5.qlchat.com/wechat/page/channel-intro?topicId=2000001596919984&channelId=220000316155998", class: ""},
+                {name: "日丰企业", url: "https://srm.rifeng.com.cn", class: ""},
+                {name: "群创线上报价", url: "http://epmall.innolux.com", class: ""},
+                {name: "东莞社保局", url: "http://www.ancc.org.cn/", class: ""},
+                {name: "物品编码中心", url: "http://www.ancc.org.cn/index.aspx", class: ""},
+                {name: "电子证照查验系统", url: "https://zzcy.dg.cn/", class: ""},
+                {name: "经营范围查验系统", url: "https://jyfwyun.com/#/visitor/home", class: ""},
+                {name: "国税", url: "https://www.etax-gd.gov.cn", class: ""},
+                {name: "海南e登记", url: "https://e-register.amr.hainan.gov.cn/icpsp-web-pc/portal.html#/index/page", class: ""},
+                {name: "广东政务服务网", url: "https://www.gdzwfw.gov.cn/", class: ""},
+                {name: "个人信用查询", url: "https://ipcrs.pbccrc.org.cn", class: ""},
+                {name: "国家税务总局", url: "https://www.chinatax.gov.cn/", class: ""},
+                {name: "产权局", url: "http://www.cnipa.gov.cn/", class: ""},
+                {name: "微信支付", url: "https://pay.weixin.qq.com/", class: ""},
+                {name: "中国人民银行征信中心", url: "https://www.pbccrc.org.cn/", class: ""},
+                {name: "中国裁判文书网", url: "https://wenshu.court.gov.cn/", class: ""},
+                {name: "中国执行信息公开网", url: "https://zxgk.court.gov.cn/", class: ""},
+                {name: "国家企业信用信息公示网官网", url: "https://www.gsxt.gov.cn/", class: ""},
+                {name: "国家政务服务平台", url: "https://gjzwfw.www.gov.cn/", class: ""},
+                {name: "专利查询", url: "http://epub.sipo.gov.cn", class: ""},
+            ],
+            common: [
+                {name: "万网代理", url: "http://www.mxd.cn/", class: ""},
+               {name: "安全联盟官网", url: "http://www.anquan.org/", class: ""},
+                {name: "东莞志愿者", url: "http://www.dgyva.com/", class: ""},
+                {name: "电子认证联盟", url: "http://www.ceaia.org.cn/", class: ""},
+                {name: "快递查询", url: "http://www.dgjcauto.com/ch/JC20130923004-96.html", class: ""},
+                {name: "电话邦", url: "https://www.dianhua.cn/", class: ""},
+                {name: "神州租车网", url: "http://www.zuche.com/", class: ""},
+                {name: "猪八戒网", url: "http://un.zhubajie.com/r/?u=10223350&l=http://www.zhubajie.com/", class: ""},
+              ],
+            finance: [
+                {name: "微淼财商", url: "http://www.weimiao.cn", class: ""},
+                {name: "中证指数", url: "http://www.csindex.com.cn/", class: ""},
+                {name: "天天基金网", url: "https://fund.eastmoney.com/", class: ""},
+                {name: "晨星基金网", url: "http://cn.morningstar.com/main/default.aspx", class: ""},
+                {name: "i问财", url: "http://www.iwencai.com/", class: ""},
+                {name: "萝卜投研", url: "https://robo.datayes.com/", class: ""},
+                {name: "理杏仁", url: "https://www.lixinger.com/", class: ""},
+                {name: "雪球信息网", url: "https://xueqiu.com/", class: ""},
+                {name: "富途牛牛网", url: "https://www.futuhk.com/", class: ""},
+                {name: "上海交易所", url: "http://www.sse.com.cn/", class: ""},
+                {name: "深圳交易所", url: "http://www.szse.cn/", class: ""},
+                {name: "香港交易所", url: "https://sc.hkex.com.hk/", class: ""},
+                {name: "国家统计局", url: "http://www.stats.gov.cn/", class: ""},
+                {name: "中国人民银行", url: "http://www.pbc.gov.cn/", class: ""},
+                {name: "巨潮资讯网", url: "http://www.cninfo.com.cn/", class: ""},
+                {name: "国家统计局数据", url: "https://data.stats.gov.cn/", class: ""},
+                {name: "同花顺个股网", url: "http://stockpage.10jqka.com.cn/", class: ""},
+                {name: "国家外汇网", url: "http://www.safe.gov.cn/", class: ""},
+                {name: "国财政部", url: "http://www.mof.gov.cn/", class: ""},
+                {name: "A股市盈率", url: "http://value500.com/PE.asp", class: ""},
+                {name: "恒生市盈率", url: "http://value500.com/hsipe.html", class: ""},
+                {name: "电脑国债收益率", url: "http://value500.com/Bond.asp", class: ""},
+                {name: "手机国债收益率", url: "https://cn.investing.com/rates-bonds/china-10-year-bond-yield", class: ""},
+                {name: "深圳市盈率", url: "https://www.legulegu.com/stockdata/shenzhenPE", class: ""},
+                {name: "房贷计算器", url: "https://www.fangdaijisuanqi.com/", class: ""},
+                {name: "实操练习小工具", url: "http://rongming.mikecrm.com/EpaKiPE", class: ""},
+                {name: "集思录可转债", url: "https://www.jisilu.cn/data/cbnew/#pre", class: ""},
+                {name: "常用网址", url: "http://rongming.mikecrm.com/zuT3TrQ", class: ""},
+                {name: "理财计算器", url: "https://m.weimiao.cn/#/myinfo/counter", class: ""}
+            ],
+             work: [
+                {name: "上隆自动化", url: "http://www.sl-fa.com/", class: ""},  
+                {name: "制造云", url: "http://www.zhizaoyun.com/", class: ""},
+                {name: "迈迪网", url: "http://www.maidiyun.com/", class: ""},
+                {name: "米思米", url: "https://www.misumi.com.cn/", class: ""},
+                {name: "迈迪设计宝", url: "http://www.maidiyun.com/", class: ""},
+                {name: "嘉立创ICAN工具箱", url: "https://ican.jlc.com/", class: ""},
+                {name: "凡一自动化", url: "http://www.forrun.cn/", class: ""},
+                {name: "轴承型号查询", url: "http://c.zcwz.com/", class: ""},
+                {name: "三维资源在线", url: "http://www.3dsource.cn/", class: ""},
+                {name: "三菱机电", url: "https://cn.mitsubishielectric.com", class: ""}, 
+                {name: "我要自学网", url: "http://www.51zxw.net/", class: ""},
+                {name: "我爱自学网", url: "http://www.52zxw.com", class: ""},
+                {name: "软件自学网", url: "http://www.rjzxw.com/", class: ""},
+                {name: "上银科技", url: "https://www.hiwin.cn/", class: ""},
+                {name: "怡合达自动化", url: "http://www.yhdfa.com/", class: ""},
+            ],
+             side: [
+                {name: "数字人AI", url: "https://www.cloudnsa.cn/super", class: ""},
+                {name: "百度AI", url: "https://chat.baidu.com/?source=pd_Page", class: ""},
+                {name: "Monica", url: "https://monica.cn/home/chat/Monica/monica", class: ""},
+                {name: "KiMi", url: "https://www.kimi.com/", class: ""},
+                {name: "Deepseek", url: "https://www.deepseek.com/", class: ""},
+                {name: "即梦AI", url: "https://jimeng.jianying.com/", class: ""},
+                {name: "副业", url: "https://www.kuake668.cn", class: ""},
+                {name: "百度数字员工", url: "https://xiling.cloud.baidu.com/", class: ""},
+                {name: "Raphael AI", url: "https://raphael.app/zh", class: ""},
+                {name: "Aigcn导航", url: "https://www.aigc.cn/ ", class: ""},
+                {name: "文件转换器", url: "https://convertio.co/zh/", class: ""},
+                {name: "AI换图", url: "https://www.linkfox.com/home", class: ""},
+                {name: "数据分析", url: "https://chatexcel.com/", class: ""},
+                {name: "海艺AI", url: "https://www.haiyi.art/ ", class: ""},
+                 ]
+        };
+
+        // 权限管理功能
+        function getPasswordFromStorage() {
+            return localStorage.getItem('qiyiTechAdminPassword') || 'admin123';
+        }
+
+        function setPasswordToStorage(password) {
+            localStorage.setItem('qiyiTechAdminPassword', password);
+        }
+
+        function checkPermission(password) {
+            return password === getPasswordFromStorage();
+        }
+
+        function grantPermission() {
+            hasPermission = true;
+            updatePermissionUI();
+            
+            // 设置权限超时
+            if (permissionTimeout) {
+                clearTimeout(permissionTimeout);
+            }
+            permissionTimeout = setTimeout(() => {
+                hasPermission = false;
+                updatePermissionUI();
+                showNotification('管理权限已过期，请重新验证', 'warning');
+            }, PERMISSION_DURATION);
+        }
+
+        function revokePermission() {
+            hasPermission = false;
+            updatePermissionUI();
+            
+            if (permissionTimeout) {
+                clearTimeout(permissionTimeout);
+                permissionTimeout = null;
+            }
+        }
+
+        function updatePermissionUI() {
+            const addLinkBtn = document.getElementById('add-link-btn');
+            const addLinkBtnBottom = document.querySelector('.add-link-btn');
+            const togglePermissionBtn = document.getElementById('toggle-permission');
+            
+            if (hasPermission) {
+                addLinkBtn.disabled = false;
+                addLinkBtnBottom.disabled = false;
+                togglePermissionBtn.innerHTML = '🔓 锁定管理';
+                togglePermissionBtn.classList.remove('btn-warning');
+                togglePermissionBtn.classList.add('btn-success');
+            } else {
+                addLinkBtn.disabled = true;
+                addLinkBtnBottom.disabled = true;
+                togglePermissionBtn.innerHTML = '🔒 解锁管理';
+                togglePermissionBtn.classList.remove('btn-success');
+                togglePermissionBtn.classList.add('btn-warning');
+            }
+        }
+
+        function requirePermission(callback) {
+            if (hasPermission) {
+                callback();
+            } else {
+                showNotification('请先解锁管理权限', 'warning');
+                document.getElementById('permission-modal').style.display = 'flex';
+                // 保存回调函数以便验证后执行
+                document.getElementById('permission-modal').dataset.callback = callback.toString();
+            }
+        }
+
+        // 从localStorage加载数据
+        function loadDataFromStorage() {
+            const savedData = localStorage.getItem('qiyiTechLinkData');
+            if (savedData) {
+                try {
+                    const parsedData = JSON.parse(savedData);
+                    // 合并保存的数据和默认数据
+                    for (const category in parsedData) {
+                        if (linkData[category]) {
+                            // 保留默认数据，只添加不在默认数据中的自定义数据
+                            const defaultNames = linkData[category].map(item => item.name);
+                            const customItems = parsedData[category].filter(item => !defaultNames.includes(item.name));
+                            linkData[category] = [...linkData[category], ...customItems];
+                        }
+                    }
+                } catch (e) {
+                    console.error('加载保存的数据失败:', e);
+                }
+            }
+        }
+
+        // 保存数据到localStorage
+        function saveDataToStorage() {
+            localStorage.setItem('qiyiTechLinkData', JSON.stringify(linkData));
+        }
+
+        // 加载标签数据
+        function loadTabData(tabName) {
+            const container = document.getElementById(`${tabName}-links`);
+            if (!container || !linkData[tabName]) return;
+            
+            container.innerHTML = '';
+            
+            linkData[tabName].forEach((link, index) => {
+                const linkItem = document.createElement('div');
+                linkItem.className = `link-item ${link.class}`;
+                
+                // 根据权限状态决定是否显示操作按钮
+                const actionsHtml = hasPermission ? 
+                    `<div class="link-actions">
+                        <button class="btn btn-small btn-secondary edit-link" data-category="${tabName}" data-index="${index}">编辑</button>
+                        <button class="btn btn-small btn-danger delete-link" data-category="${tabName}" data-index="${index}">删除</button>
+                    </div>` : '';
+                
+                linkItem.innerHTML = `
+                    <a href="${link.url}" target="_blank" title="${link.name}">${link.name}</a>
+                    ${actionsHtml}
+                `;
+                container.appendChild(linkItem);
+            });
+            
+            // 添加编辑和删除事件监听
+            if (hasPermission) {
+                container.querySelectorAll('.edit-link').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const category = this.dataset.category;
+                        const index = parseInt(this.dataset.index);
+                        editLink(category, index);
+                    });
+                });
+                
+                container.querySelectorAll('.delete-link').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const category = this.dataset.category;
+                        const index = parseInt(this.dataset.index);
+                        deleteLink(category, index);
+                    });
+                });
+            }
+        }
+
+        // 添加新链接
+        function addLink(category, name, url, colorClass = '') {
+            if (!linkData[category]) {
+                linkData[category] = [];
+            }
+            
+            linkData[category].push({
+                name: name,
+                url: url,
+                class: colorClass
+            });
+            
+            saveDataToStorage();
+            loadTabData(category);
+            showNotification('网址添加成功！', 'success');
+        }
+
+        // 编辑链接
+        function editLink(category, index) {
+            const link = linkData[category][index];
+            
+            document.getElementById('modal-title').textContent = '编辑网址';
+            document.getElementById('link-index').value = `${category},${index}`;
+            document.getElementById('link-name').value = link.name;
+            document.getElementById('link-url').value = link.url;
+            document.getElementById('link-category').value = category;
+            document.getElementById('link-color').value = link.class;
+            
+            document.getElementById('link-modal').style.display = 'flex';
+        }
+
+        // 删除链接
+        function deleteLink(category, index) {
+            if (confirm('确定要删除这个网址吗？')) {
+                linkData[category].splice(index, 1);
+                saveDataToStorage();
+                loadTabData(category);
+                showNotification('网址删除成功！', 'success');
+            }
+        }
+
+        // 导出数据
+        function exportData() {
+            const dataStr = JSON.stringify(linkData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'qiyi-tech-links.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('数据导出成功！', 'success');
+        }
+
+        // 导入数据
+        function importData() {
+            document.getElementById('import-modal').style.display = 'flex';
+        }
+
+        // 初始化加载推荐网址和问候语
+        window.onload = function() {
+            loadDataFromStorage();
+            loadTabData('recommended');
+            updateGreeting();
+            updatePermissionUI(); // 初始化权限UI
+        };
+
+        // 搜索输入框获取焦点时清除提示
+        document.querySelector('.search-input').addEventListener('focus', function() {
+            if (this.value === '请输入搜索关键词...') {
+                this.value = '';
+            }
+        });
+
+        // 搜索输入框失去焦点时恢复提示
+        document.querySelector('.search-input').addEventListener('blur', function() {
+            if (this.value === '') {
+                this.value = '请输入搜索关键词...';
+            }
+        });
+
+        // 回车键搜索
+        document.querySelector('.search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.querySelector('.search-btn').click();
+            }
+        });
+
+        // 添加网址按钮事件
+        document.getElementById('add-link-btn').addEventListener('click', function() {
+            requirePermission(() => {
+                document.getElementById('modal-title').textContent = '添加网址';
+                document.getElementById('link-index').value = '';
+                document.getElementById('link-name').value = '';
+                document.getElementById('link-url').value = '';
+                document.getElementById('link-category').value = document.querySelector('.add-link-btn').dataset.tab;
+                document.getElementById('link-color').value = '';
+                
+                document.getElementById('link-modal').style.display = 'flex';
+            });
+        });
+
+        // 底部添加网址按钮事件
+        document.querySelector('.add-link-btn').addEventListener('click', function() {
+            requirePermission(() => {
+                document.getElementById('modal-title').textContent = '添加网址';
+                document.getElementById('link-index').value = '';
+                document.getElementById('link-name').value = '';
+                document.getElementById('link-url').value = '';
+                document.getElementById('link-category').value = this.dataset.tab;
+                document.getElementById('link-color').value = '';
+                
+                document.getElementById('link-modal').style.display = 'flex';
+            });
+        });
+
+        // 添加网址表单提交
+        document.getElementById('link-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('link-name').value;
+            const url = document.getElementById('link-url').value;
+            const category = document.getElementById('link-category').value;
+            const color = document.getElementById('link-color').value;
+            const indexValue = document.getElementById('link-index').value;
+            
+            if (indexValue) {
+                // 编辑现有链接
+                const [cat, idx] = indexValue.split(',');
+                linkData[cat][idx].name = name;
+                linkData[cat][idx].url = url;
+                linkData[cat][idx].class = color;
+                
+                // 如果分类改变了，移动到新分类
+                if (cat !== category) {
+                    const link = linkData[cat][idx];
+                    linkData[cat].splice(idx, 1);
+                    linkData[category].push(link);
+                }
+                
+                saveDataToStorage();
+                loadTabData(category);
+                if (cat !== category) {
+                    loadTabData(cat);
+                }
+                showNotification('网址更新成功！', 'success');
+            } else {
+                // 添加新链接
+                addLink(category, name, url, color);
+            }
+            
+            document.getElementById('link-modal').style.display = 'none';
+        });
+
+        // 导出数据按钮事件
+        document.getElementById('export-data').addEventListener('click', exportData);
+
+        // 导入数据按钮事件
+        document.getElementById('export-data').addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            requirePermission(() => {
+                importData();
+            });
+        });
+
+        // 权限切换按钮事件
+        document.getElementById('toggle-permission').addEventListener('click', function() {
+            if (hasPermission) {
+                revokePermission();
+                showNotification('管理权限已锁定', 'info');
+            } else {
+                document.getElementById('permission-modal').style.display = 'flex';
+            }
+        });
+
+        // 权限验证按钮事件
+        document.getElementById('confirm-permission').addEventListener('click', function() {
+            const password = document.getElementById('permission-password').value;
+            
+            if (checkPermission(password)) {
+                grantPermission();
+                document.getElementById('permission-modal').style.display = 'none';
+                document.getElementById('permission-password').value = '';
+                showNotification('管理权限已解锁', 'success');
+                
+                // 执行保存的回调函数
+                const callbackStr = document.getElementById('permission-modal').dataset.callback;
+                if (callbackStr) {
+                    const callback = eval(`(${callbackStr})`);
+                    callback();
+                    document.getElementById('permission-modal').dataset.callback = '';
+                }
+            } else {
+                showNotification('密码错误，请重试', 'error');
+                document.getElementById('permission-password').value = '';
+                document.getElementById('permission-password').focus();
+            }
+        });
+
+        // 修改密码功能（长按权限按钮）
+        let passwordTimer;
+        document.getElementById('toggle-permission').addEventListener('mousedown', function() {
+            passwordTimer = setTimeout(() => {
+                document.getElementById('change-password-modal').style.display = 'flex';
+            }, 2000); // 长按2秒
+        });
+
+        document.getElementById('toggle-permission').addEventListener('mouseup', function() {
+            clearTimeout(passwordTimer);
+        });
+
+        document.getElementById('toggle-permission').addEventListener('mouseleave', function() {
+            clearTimeout(passwordTimer);
+        });
+
+        // 确认修改密码
+        document.getElementById('confirm-change-password').addEventListener('click', function() {
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            if (!checkPermission(currentPassword)) {
+                showNotification('当前密码错误', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showNotification('新密码不一致', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showNotification('密码长度至少6位', 'error');
+                return;
+            }
+            
+            setPasswordToStorage(newPassword);
+            document.getElementById('change-password-modal').style.display = 'none';
+            document.getElementById('current-password').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-password').value = '';
+            showNotification('密码修改成功', 'success');
+        });
+
+        // 确认导入数据
+        document.getElementById('confirm-import').addEventListener('click', function() {
+            const importDataText = document.getElementById('import-data').value;
+            
+            if (!importDataText) {
+                showNotification('请输入要导入的数据', 'warning');
+                return;
+            }
+            
+            try {
+                const importedData = JSON.parse(importDataText);
+                
+                // 验证数据结构
+                let isValid = true;
+                for (const category in importedData) {
+                    if (!Array.isArray(importedData[category])) {
+                        isValid = false;
+                        break;
+                    }
+                    
+                    for (const item of importedData[category]) {
+                        if (!item.name || !item.url) {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                    
+                    if (!isValid) break;
+                }
+                
+                if (isValid) {
+                    // 合并数据
+                    for (const category in importedData) {
+                        if (!linkData[category]) {
+                            linkData[category] = [];
+                        }
+                        
+                        // 只添加不重复的数据
+                        const existingNames = linkData[category].map(item => item.name);
+                        const newItems = importedData[category].filter(item => !existingNames.includes(item.name));
+                        linkData[category] = [...linkData[category], ...newItems];
+                    }
+                    
+                    saveDataToStorage();
+                    
+                    // 重新加载当前标签页
+                    const currentTab = document.querySelector('.main-tab.active').dataset.tab;
+                    loadTabData(currentTab);
+                    
+                    document.getElementById('import-modal').style.display = 'none';
+                    showNotification('数据导入成功！', 'success');
+                } else {
+                    showNotification('导入的数据格式不正确', 'error');
+                }
+            } catch (e) {
+                showNotification('导入的数据格式不正确', 'error');
+            }
+        });
+
+        // 模态框关闭事件
+        document.getElementById('modal-close').addEventListener('click', function() {
+            document.getElementById('link-modal').style.display = 'none';
+        });
+
+        document.getElementById('cancel-btn').addEventListener('click', function() {
+            document.getElementById('link-modal').style.display = 'none';
+        });
+
+        document.getElementById('permission-modal-close').addEventListener('click', function() {
+            document.getElementById('permission-modal').style.display = 'none';
+            document.getElementById('permission-password').value = '';
+        });
+
+        document.getElementById('cancel-permission').addEventListener('click', function() {
+            document.getElementById('permission-modal').style.display = 'none';
+            document.getElementById('permission-password').value = '';
+        });
+
+        document.getElementById('change-password-modal-close').addEventListener('click', function() {
+            document.getElementById('change-password-modal').style.display = 'none';
+            document.getElementById('current-password').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-password').value = '';
+        });
+
+        document.getElementById('cancel-change-password').addEventListener('click', function() {
+            document.getElementById('change-password-modal').style.display = 'none';
+            document.getElementById('current-password').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-password').value = '';
+        });
+
+        document.getElementById('import-modal-close').addEventListener('click', function() {
+            document.getElementById('import-modal').style.display = 'none';
+        });
+
+        document.getElementById('cancel-import').addEventListener('click', function() {
+            document.getElementById('import-modal').style.display = 'none';
+        });
+
+        // 点击模态框外部关闭
+        window.addEventListener('click', function(e) {
+            if (e.target === document.getElementById('link-modal')) {
+                document.getElementById('link-modal').style.display = 'none';
+            }
+            if (e.target === document.getElementById('permission-modal')) {
+                document.getElementById('permission-modal').style.display = 'none';
+                document.getElementById('permission-password').value = '';
+            }
+            if (e.target === document.getElementById('change-password-modal')) {
+                document.getElementById('change-password-modal').style.display = 'none';
+                document.getElementById('current-password').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-password').value = '';
+            }
+            if (e.target === document.getElementById('import-modal')) {
+                document.getElementById('import-modal').style.display = 'none';
+            }
+        });
+
+        // 问候语关闭按钮事件
+        document.getElementById('greeting-close').addEventListener('click', hideGreeting);
+
+        // 初始化时间显示和问候语
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>

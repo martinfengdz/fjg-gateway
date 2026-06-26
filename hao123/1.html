@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>定制导航系统</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">奇易导航</div>
+            <div class="header-tools">
+                <button class="btn" id="set-homepage">设为主页</button>
+                <button class="btn" id="refresh-page">刷新页面</button>
+                <button class="btn btn-success" id="add-link-btn" disabled>添加网址</button>
+                <button class="btn btn-secondary" id="export-data">导出数据</button>
+                <button class="btn btn-warning" id="toggle-permission">🔒 解锁管理</button>
+                <div id="current-time" class="time-display"></div>
+            </div>
+        </header>
+        
+        <!-- 问候语区域 -->
+        <div id="greeting" class="greeting">
+            <span id="greeting-text"></span>
+            <button class="greeting-close" id="greeting-close">×</button>
+        </div>
+        
+        <section class="search-section">
+            <div class="search-tabs">
+                <div class="search-tab active" data-tab="web">网页</div>
+                <div class="search-tab" data-tab="news">新闻</div>
+                <div class="search-tab" data-tab="mp3">MP3</div>
+                <div class="search-tab" data-tab="video">视频</div>
+                <div class="search-tab" data-tab="image">图片</div>
+                <div class="search-tab" data-tab="map">地图</div>
+                <div class="search-tab" data-tab="qa">问答</div>
+                <div class="search-tab" data-tab="shopping">购物</div>
+            </div>
+            
+            <div class="search-content">
+                <div class="search-form">
+                    <input type="text" class="search-input" placeholder="请输入搜索关键词...">
+                    <button class="search-btn">搜索</button>
+                </div>
+               <div class="search-engines">
+                    <div class="search-engine">
+                        <input type="radio" id="baidu" name="engine" checked>
+                        <label for="baidu">百度</label>
+                    </div>
+                    <div class="search-engine">
+                        <input type="radio" id="google" name="engine">
+                        <label for="google">谷歌</label>
+                    </div>
+                    <div class="search-engine">
+                        <input type="radio" id="sogou" name="engine">
+                        <label for="sogou">搜狗</label>
+                    </div>
+                    <div class="search-engine">
+                        <input type="radio" id="soso" name="engine">
+                        <label for="soso">SOSO</label>
+                    </div>
+                </div>
+            </div>        
+         
+        </section>
+        
+        <section class="main-content">
+            <div class="main-tabs">
+                <div class="main-tab active" data-tab="recommended">推荐网址</div>
+                <div class="main-tab" data-tab="proxy">代理系统</div>
+                <div class="main-tab" data-tab="internal">内部精彩</div>
+                <div class="main-tab" data-tab="software">常用软件</div>
+                <div class="main-tab" data-tab="business">在线业务</div>
+                <div class="main-tab" data-tab="common">常用网址</div>
+                <div class="main-tab" data-tab="finance">财务理财</div>
+                 <div class="main-tab" data-tab="work">工作工具</div>
+                  <div class="main-tab" data-tab="side">AI工具</div>
+            </div>
+            
+            <div class="links-container">
+                <div class="links-grid" id="recommended-links">
+                    <!-- 推荐网址内容将通过JS动态加载 -->
+                </div>
+                
+                <div class="links-grid" id="proxy-links" style="display:none;">
+                    <!-- 代理系统内容将通过JS动态加载 -->
+                </div>
+                
+                <div class="links-grid" id="internal-links" style="display:none;">
+                    <!-- 内部精彩内容将通过JS动态加载 -->
+                </div>
+                
+                <div class="links-grid" id="software-links" style="display:none;">
+                    <!-- 常用软件内容将通过JS动态加载 -->
+                </div>
+                
+                <div class="links-grid" id="business-links" style="display:none;">
+                    <!-- 在线业务内容将通过JS动态加载 -->
+                </div>
+                
+                <div class="links-grid" id="common-links" style="display:none;">
+                    <!-- 常用网址内容将通过JS动态加载 -->
+                </div>
+                
+                <div class="links-grid" id="finance-links" style="display:none;">
+                    <!-- 财务理财内容将通过JS动态加载 -->
+                      </div>
+               <div class="links-grid" id="work-links" style="display:none;">
+                    <!-- 工作工具内容将通过JS动态加载 -->
+                      </div>
+               <div class="links-grid" id="side-links" style="display:none;">
+                    <!-- AI工具内容将通过JS动态加载 -->
+                </div>
+                
+                <button class="btn add-link-btn" data-tab="recommended" disabled>+ 添加网址</button>
+            </div>
+        </section>
+        
+        <footer>
+            <div class="footer-links">
+                <a href="http://192.168.1.1/" target="_blank">路由器</a>
+                <a href="CRME4.pdf" target="_blank">CRM说明书</a>
+                <a href="http://192.168.19.13" target="_blank">NSA320服务器</a>
+                <a href="http://192.168.1.119:91/cgi-bin/" target="_blank">NSA319服务器</a>
+                <a href="2013002.html" target="_blank">网址提交</a>
+                <a href="index2.html" target="_blank">外网导航</a>
+                <a href="customs.html" target="_blank">税务计算器</a>
+                 <a href="TEST.html" target="_blank">网络测速</a>
+                   <a href="131.html" target="_blank">齿轮计算器</a>
+                <a href="zlcalculator.html" target="_blank">理财计算器</a>
+            </div>
+            <p>Powered by 奇易服务器导航 © <span id="current-year"></span>.2025V13 All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <!-- 添加/编辑网址模态框 -->
+    <div class="modal" id="link-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">添加网址</h3>
+                <button class="modal-close" id="modal-close">×</button>
+            </div>
+            <form id="link-form">
+                <input type="hidden" id="link-index">
+                <div class="form-group">
+                    <label for="link-name" class="form-label">网站名称</label>
+                    <input type="text" id="link-name" class="form-input" placeholder="输入网站名称" required>
+                </div>
+                <div class="form-group">
+                    <label for="link-url" class="form-label">网站地址</label>
+                    <input type="url" id="link-url" class="form-input" placeholder="https://example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="link-category" class="form-label">分类</label>
+                    <select id="link-category" class="form-select">
+                        <option value="recommended">推荐网址</option>
+                        <option value="proxy">代理系统</option>
+                        <option value="internal">内部精彩</option>
+                        <option value="software">常用软件</option>
+                        <option value="business">在线业务</option>
+                        <option value="common">常用网址</option>
+                        <option value="finance">财务理财</option>
+                        <option value="work">工作工具</option>
+                        <option value="side">AI工具</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="link-color" class="form-label">颜色标记</label>
+                    <select id="link-color" class="form-select">
+                        <option value="">默认</option>
+                        <option value="red">红色</option>
+                        <option value="green">绿色</option>
+                        <option value="blue">蓝色</option>
+                        <option value="orange">橙色</option>
+                        <option value="purple">紫色</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-btn">取消</button>
+                    <button type="submit" class="btn btn-success" id="save-btn">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 权限验证模态框 -->
+    <div class="modal" id="permission-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">管理权限验证</h3>
+                <button class="modal-close" id="permission-modal-close">×</button>
+            </div>
+            <div class="form-group">
+                <label for="permission-password" class="form-label">请输入管理密码</label>
+                <input type="password" id="permission-password" class="form-input" placeholder="输入密码" required>
+                <small class="form-text">默认密码：admin123（首次使用后请修改）</small>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-permission">取消</button>
+                <button type="button" class="btn btn-success" id="confirm-permission">验证</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改密码模态框 -->
+    <div class="modal" id="change-password-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">修改管理密码</h3>
+                <button class="modal-close" id="change-password-modal-close">×</button>
+            </div>
+            <div class="form-group">
+                <label for="current-password" class="form-label">当前密码</label>
+                <input type="password" id="current-password" class="form-input" placeholder="输入当前密码" required>
+            </div>
+            <div class="form-group">
+                <label for="new-password" class="form-label">新密码</label>
+                <input type="password" id="new-password" class="form-input" placeholder="输入新密码" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password" class="form-label">确认新密码</label>
+                <input type="password" id="confirm-password" class="form-input" placeholder="再次输入新密码" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-change-password">取消</button>
+                <button type="button" class="btn btn-success" id="confirm-change-password">修改</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入数据模态框 -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">导入数据</h3>
+                <button class="modal-close" id="import-modal-close">×</button>
+            </div>
+            <div class="form-group">
+                <label for="import-data" class="form-label">粘贴导出的数据</label>
+                <textarea id="import-data" class="form-input" rows="10" placeholder="粘贴之前导出的JSON数据"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-import">取消</button>
+                <button type="button" class="btn btn-success" id="confirm-import">导入</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <span id="notification-text">操作成功！</span>
+        <span class="close" id="notification-close">×</span>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

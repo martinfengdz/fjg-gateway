@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="refresh" content="60">
+  
+<meta HTTP-EQUIV="pragma" CONTENT="no-cache">
+<meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate">
+<meta HTTP-EQUIV="expires" CONTENT="0">
+<meta name="apple-touch-fullscreen" content="yes" />
+<meta name="format-detection" content="telephone=no" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no" media="screen" />
+
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>金米自动化设备延时解锁码在线生成</title>
+<script language="javascript">
+function GetSum()
+{
+  var TheSum = 0;
+  var ya=FORM1.ya.value;
+  var ya_left;
+  var ya_right;
+if(ya==""){FORM1.ya.focus();
+alert("请填写锁机号码！");
+return false;}  
+if(ya.length >8){FORM1.ya.focus();
+alert("请填写8位正确的锁机号码！");
+return false;}
+
+if(ya.length <2){ya="0000000"+ya;}
+if(ya.length <3){ya="000000"+ya;}
+if(ya.length <4){ya="00000"+ya;}
+if(ya.length <5){ya="0000"+ya;}
+if(ya.length <6){ya="000"+ya;}
+if(ya.length <7){ya="00"+ya;}
+if(ya.length <8){ya="0"+ya;}
+ya_left = ya.substr(0,4);
+ya_right = ya.substr(4,4);
+    TheSum=ya_left*287+ya_right*831+23934
+  var string_TheSum = TheSum.toString();
+if(string_TheSum.length <2){string_TheSum="0000000"+string_TheSum;}
+if(string_TheSum.length <3){string_TheSum="000000"+string_TheSum;}
+if(string_TheSum.length <4){string_TheSum="00000"+string_TheSum;}
+if(string_TheSum.length <5){string_TheSum="0000"+string_TheSum;}
+if(string_TheSum.length <6){string_TheSum="000"+string_TheSum;}
+if(string_TheSum.length <7){string_TheSum="00"+string_TheSum;}
+if(string_TheSum.length <8){string_TheSum="0"+string_TheSum;}  
+  FORM1.yc.value = string_TheSum;
+  
+    var ya_str = ya.toString();
+  FORM1.ya.value = ya_str;
+}
+//-->
+</script>
+<style type="text/css">
+<!--
+.STYLE1 {color: #0000FF}
+.STYLE2 {color: #FF00FF}
+.STYLE5 {color: #FF0033}
+.STYLE7 {
+	font-size: 16px;
+	font-weight: bold;
+}
+.STYLE8 {
+	font-size: 18px;
+	color: #0066FF;
+}
+.STYLE9 {font-size: 12px}
+-->
+</style>
+</head>
+
+<body>
+<div align="center">
+  <table width="380" border="1" align="center" bordercolor="#009900" bgcolor="#99FFFF">
+   <form name="FORM1" id="FORM1" method="post" action="">
+    <tr>
+      <td colspan="2" bgcolor="#66FFCC"><div align="center"><span class="spana STYLE8">东莞市金米(增利)自动化科技有限公司</span></div></td>
+    </tr>
+    
+    <tr>
+      <td colspan="2"><div align="center" class="STYLE7">设备延时解锁码</div></td>
+    </tr>
+    <tr>
+      <td width="189"><div align="center" class="STYLE1">锁机号码：</div></td>
+      <td width="175" bgcolor="#CCCCFF"><input id="ya" type="text" maxlength="100" size="25" name="ya" onkeyup="value=value.replace(/[^\d  |^\.]/g,'')" /></td>
+    </tr>
+<!--    <tr>
+      <td><div align="center" class="STYLE2">锁机号码后4位：</div></td>
+      <td bgcolor="#CCCCFF"><input id="yb" type="text" maxlength="100" size="25" name="yb" onkeyup="value=value.replace(/[^\d  |^\.]/g,'')" /></td>
+    </tr>-->
+    <tr>
+      <td><div align="center">延时30天解锁码:</div></td>
+      <td bgcolor="#9999FF"><input id="yc" type="text" maxlength="100" size="25" name="yc" /></td>
+    </tr>
+    <tr>
+      <td><div align="center">
+        <input type="button" onclick="GetSum();" value="生 成" name="Submit" />
+      </div></td>
+      <td><div align="center">
+        <input type="submit" value="重置" name="Submit2" />
+      </div></td>
+    </tr>
+      <tr>
+      <td colspan="2"><span class="STYLE5">1.此解锁码，延期为一个月</span></td>
+    </tr>
+    <tr>
+      <td colspan="2"><span class="STYLE2">2.若求解终锁码，请至电厂商</span></td>
+    </tr>
+    <tr>
+     <td colspan="2"><div align="center"><a target="_blank" class="STYLE9">Powered by 增利自动化V1.2. All Rights Reserved.</a></div></td>
+    </tr>
+    </form>
+  </table>
+</div>
+</body>
+</html>

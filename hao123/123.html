@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多功能科学计算器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cbc;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --accent-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --bg-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-theme {
+            --bg-color: #1a1a2e;
+            --card-color: #16213e;
+            --text-color: #e6e6e6;
+            --light-color: #2d3748;
+            --shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        .calculator-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: var(--card-color);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+        
+        .calculator-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        
+        .calculator-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .calculator-title i {
+            font-size: 1.5rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .theme-toggle, .mode-toggle {
+            display: flex;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 3px;
+        }
+        
+        .theme-btn, .mode-btn {
+            padding: 5px 10px;
+            border: none;
+            background: transparent;
+            color: white;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .theme-btn.active, .mode-btn.active {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .display-container {
+            padding: 20px;
+            background-color: var(--light-color);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            transition: background 0.3s;
+        }
+        
+        .display {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: right;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: background 0.3s;
+        }
+        
+        .previous-operation {
+            font-size: 1rem;
+            color: #7f8c8d;
+            min-height: 24px;
+            word-break: break-all;
+        }
+        
+        .current-operation {
+            font-size: 2rem;
+            font-weight: 600;
+            word-break: break-all;
+            transition: color 0.3s;
+        }
+        
+        .memory-indicator {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+        }
+        
+        .memory-item {
+            background: rgba(74, 111, 165, 0.1);
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 20px;
+        }
+        
+        .scientific-buttons {
+            display: none;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            padding: 0 20px 20px;
+        }
+        
+        .btn {
+            padding: 16px 10px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-number {
+            background-color: #f0f0f0;
+            color: var(--dark-color);
+        }
+        
+        .btn-operator {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-function {
+            background-color: #e8e8e8;
+            color: var(--dark-color);
+        }
+        
+        .btn-equals {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-clear {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-memory {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-scientific {
+            background-color: #d5d5d5;
+            color: var(--dark-color);
+        }
+        
+        .span-2 {
+            grid-column: span 2;
+        }
+        
+        .history-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background-color: var(--light-color);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            transition: background 0.3s;
+        }
+        
+        .history-container.show {
+            max-height: 250px;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background-color: rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .history-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .history-control-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.3s;
+        }
+        
+        .history-list {
+            padding: 10px 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            transition: border-color 0.3s;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-expression {
+            color: #7f8c8d;
+        }
+        
+        .history-result {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .empty-history {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 20px 0;
+        }
+        
+        @media (max-width: 480px) {
+            .buttons-grid, .scientific-buttons {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 14px 5px;
+                font-size: 1rem;
+            }
+            
+            .scientific-buttons {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .span-2 {
+                grid-column: span 2;
+            }
+        }
+        
+        .key-hint {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="calculator-header">
+            <div class="calculator-title">
+                <i class="fas fa-calculator"></i>
+                多功能科学计算器
+            </div>
+            <div class="header-controls">
+                <div class="theme-toggle">
+                    <button class="theme-btn active" id="light-theme" title="浅色模式">
+                        <i class="fas fa-sun"></i>
+                    </button>
+                    <button class="theme-btn" id="dark-theme" title="深色模式">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+                <div class="mode-toggle">
+                    <button class="mode-btn active" id="basic-mode">
+                        <i class="fas fa-calculator"></i> 基本
+                    </button>
+                    <button class="mode-btn" id="scientific-mode">
+                        <i class="fas fa-flask"></i> 科学
+                    </button>
+                </div>
+            </div>
+            <div class="key-hint">提示: 您可以使用键盘输入数字和运算符</div>
+        </div>
+        
+        <div class="display-container">
+            <div class="display">
+                <div class="previous-operation" id="previous-operation"></div>
+                <div class="current-operation" id="current-operation">0</div>
+                <div class="memory-indicator" id="memory-indicator">
+                    <!-- 内存指示器将在这里动态生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="scientific-buttons" id="scientific-buttons">
+            <button class="btn btn-scientific" data-action="sin">sin</button>
+            <button class="btn btn-scientific" data-action="cos">cos</button>
+            <button class="btn btn-scientific" data-action="tan">tan</button>
+            <button class="btn btn-scientific" data-action="log">log</button>
+            <button class="btn btn-scientific" data-action="ln">ln</button>
+            <button class="btn btn-scientific" data-action="sqrt">√</button>
+            <button class="btn btn-scientific" data-action="square">x²</button>
+            <button class="btn btn-scientific" data-action="cube">x³</button>
+            <button class="btn btn-scientific" data-action="power">x^y</button>
+            <button class="btn btn-scientific" data-action="factorial">x!</button>
+            <button class="btn btn-scientific" data-action="pi">π</button>
+            <button class="btn btn-scientific" data-action="e">e</button>
+            <button class="btn btn-scientific" data-action="open-paren">(</button>
+            <button class="btn btn-scientific" data-action="close-paren">)</button>
+            <button class="btn btn-scientific" data-action="abs">|x|</button>
+        </div>
+        
+        <div class="buttons-grid">
+            <!-- 第一行 -->
+            <button class="btn btn-clear" data-action="clear">C</button>
+            <button class="btn btn-function" data-action="backspace">
+                <i class="fas fa-backspace"></i>
+            </button>
+            <button class="btn btn-function" data-action="percent">%</button>
+            <button class="btn btn-operator" data-action="divide">
+                <i class="fas fa-divide"></i>
+            </button>
+            
+            <!-- 第二行 -->
+            <button class="btn btn-number" data-number="7">7</button>
+            <button class="btn btn-number" data-number="8">8</button>
+            <button class="btn btn-number" data-number="9">9</button>
+            <button class="btn btn-operator" data-action="multiply">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <!-- 第三行 -->
+            <button class="btn btn-number" data-number="4">4</button>
+            <button class="btn btn-number" data-number="5">5</button>
+            <button class="btn btn-number" data-number="6">6</button>
+            <button class="btn btn-operator" data-action="subtract">
+                <i class="fas fa-minus"></i>
+            </button>
+            
+            <!-- 第四行 -->
+            <button class="btn btn-number" data-number="1">1</button>
+            <button class="btn btn-number" data-number="2">2</button>
+            <button class="btn btn-number" data-number="3">3</button>
+            <button class="btn btn-operator" data-action="add">
+                <i class="fas fa-plus"></i>
+            </button>
+            
+            <!-- 第五行 -->
+            <button class="btn btn-number span-2" data-number="0">0</button>
+            <button class="btn btn-function" data-action="decimal">.</button>
+            <button class="btn btn-equals" data-action="calculate">
+                <i class="fas fa-equals"></i>
+            </button>
+        </div>
+        
+        <div class="history-container" id="history-container">
+            <div class="history-header" id="history-toggle">
+                <span><i class="fas fa-history"></i> 计算历史</span>
+                <div class="history-controls">
+                    <button class="history-control-btn" id="clear-history-btn">
+                        <i class="fas fa-trash-alt"></i> 清除历史
+                    </button>
+                    <span><i class="fas fa-chevron-down"></i></span>
+                </div>
+            </div>
+            <div class="history-list" id="history-list">
+                <div class="empty-history">暂无历史记录</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const currentOperationElement = document.getElementById('current-operation');
+            const previousOperationElement = document.getElementById('previous-operation');
+            const historyContainer = document.getElementById('history-container');
+            const historyList = document.getElementById('history-list');
+            const historyToggle = document.getElementById('history-toggle');
+            const clearHistoryBtn = document.getElementById('clear-history-btn');
+            const scientificButtons = document.getElementById('scientific-buttons');
+            const basicModeBtn = document.getElementById('basic-mode');
+            const scientificModeBtn = document.getElementById('scientific-mode');
+            const lightThemeBtn = document.getElementById('light-theme');
+            const darkThemeBtn = document.getElementById('dark-theme');
+            const memoryIndicator = document.getElementById('memory-indicator');
+            
+            // 计算器状态
+            let currentOperation = '0';
+            let previousOperation = '';
+            let operator = null;
+            let waitingForNewOperand = false;
+            let calculationHistory = [];
+            let memoryValue = 0;
+            let isDarkTheme = false;
+            
+            // 更新显示
+            function updateDisplay() {
+                currentOperationElement.textContent = formatNumber(currentOperation);
+                previousOperationElement.textContent = previousOperation;
+                updateMemoryIndicator();
+            }
+            
+            // 格式化数字显示
+            function formatNumber(num) {
+                if (num === 'Error') return num;
+                
+                // 如果是科学计数法显示的数字，直接返回
+                if (num.includes('e')) return num;
+                
+                let number = parseFloat(num);
+                if (isNaN(number)) return num;
+                
+                // 如果数字太大或太小，使用科学计数法
+                if (Math.abs(number) > 999999999999 || (Math.abs(number) < 0.000000001 && number !== 0)) {
+                    return number.toExponential(8).replace('e+', 'e');
+                }
+                
+                // 常规数字格式化
+                return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            
+            // 添加数字
+            function inputNumber(number) {
+                if (waitingForNewOperand) {
+                    currentOperation = number;
+                    waitingForNewOperand = false;
+                } else {
+                    currentOperation = currentOperation === '0' ? number : currentOperation + number;
+                }
+            }
+            
+            // 添加小数点
+            function inputDecimal() {
+                if (waitingForNewOperand) {
+                    currentOperation = '0.';
+                    waitingForNewOperand = false;
+                    return;
+                }
+                
+                if (!currentOperation.includes('.')) {
+                    currentOperation += '.';
+                }
+            }
+            
+            // 处理操作符
+            function handleOperator(nextOperator) {
+                const inputValue = parseFloat(currentOperation);
+                
+                if (operator && waitingForNewOperand) {
+                    operator = nextOperator;
+                    previousOperation = previousOperation.slice(0, -1) + nextOperator;
+                    updateDisplay();
+                    return;
+                }
+                
+                if (previousOperation === '') {
+                    previousOperation = currentOperation;
+                } else if (operator) {
+                    const result = calculate();
+                    if (result === 'Error') {
+                        currentOperation = result;
+                        previousOperation = '';
+                        operator = null;
+                        updateDisplay();
+                        return;
+                    }
+                    currentOperation = `${result}`;
+                    previousOperation = `${result}`;
+                }
+                
+                operator = nextOperator;
+                previousOperation += ` ${nextOperator}`;
+                waitingForNewOperand = true;
+                updateDisplay();
+            }
+            
+            // 执行计算
+            function calculate() {
+                const prevValue = parseFloat(previousOperation);
+                const currentValue = parseFloat(currentOperation);
+                
+                if (isNaN(prevValue) || isNaN(currentValue)) return 'Error';
+                
+                let computation;
+                switch (operator) {
+                    case '+':
+                        computation = prevValue + currentValue;
+                        break;
+                    case '-':
+                        computation = prevValue - currentValue;
+                        break;
+                    case '×':
+                        computation = prevValue * currentValue;
+                        break;
+                    case '÷':
+                        if (currentValue === 0) return 'Error';
+                        computation = prevValue / currentValue;
+                        break;
+                    case '^':
+                        computation = Math.pow(prevValue, currentValue);
+                        break;
+                    default:
+                        return currentValue;
+                }
+                
+                return computation;
+            }
+            
+            // 百分比计算
+            function calculatePercentage() {
+                const currentValue = parseFloat(currentOperation);
+                if (isNaN(currentValue)) return;
+                
+                currentOperation = (currentValue / 100).toString();
+                updateDisplay();
+            }
+            
+            // 科学计算函数
+            function scientificFunction(func) {
+                const currentValue = parseFloat(currentOperation);
+                if (isNaN(currentValue)) return;
+                
+                let result;
+                let expression = '';
+                
+                try {
+                    switch (func) {
+                        case 'sin':
+                            result = Math.sin(currentValue * Math.PI / 180);
+                            expression = `sin(${currentValue})`;
+                            break;
+                        case 'cos':
+                            result = Math.cos(currentValue * Math.PI / 180);
+                            expression = `cos(${currentValue})`;
+                            break;
+                        case 'tan':
+                            result = Math.tan(currentValue * Math.PI / 180);
+                            expression = `tan(${currentValue})`;
+                            break;
+                        case 'log':
+                            if (currentValue <= 0) throw new Error('Invalid input');
+                            result = Math.log10(currentValue);
+                            expression = `log(${currentValue})`;
+                            break;
+                        case 'ln':
+                            if (currentValue <= 0) throw new Error('Invalid input');
+                            result = Math.log(currentValue);
+                            expression = `ln(${currentValue})`;
+                            break;
+                        case 'sqrt':
+                            if (currentValue < 0) throw new Error('Invalid input');
+                            result = Math.sqrt(currentValue);
+                            expression = `√(${currentValue})`;
+                            break;
+                        case 'square':
+                            result = Math.pow(currentValue, 2);
+                            expression = `(${currentValue})²`;
+                            break;
+                        case 'cube':
+                            result = Math.pow(currentValue, 3);
+                            expression = `(${currentValue})³`;
+                            break;
+                        case 'power':
+                            operator = '^';
+                            previousOperation = currentOperation + ' ^';
+                            waitingForNewOperand = true;
+                            updateDisplay();
+                            return;
+                        case 'factorial':
+                            if (currentValue < 0 || !Number.isInteger(currentValue)) throw new Error('Invalid input');
+                            result = factorial(currentValue);
+                            expression = `(${currentValue})!`;
+                            break;
+                        case 'pi':
+                            currentOperation = Math.PI.toString();
+                            updateDisplay();
+                            return;
+                        case 'e':
+                            currentOperation = Math.E.toString();
+                            updateDisplay();
+                            return;
+                        case 'open-paren':
+                            if (waitingForNewOperand) {
+                                currentOperation = '(';
+                                waitingForNewOperand = false;
+                            } else {
+                                currentOperation += '(';
+                            }
+                            updateDisplay();
+                            return;
+                        case 'close-paren':
+                            currentOperation += ')';
+                            updateDisplay();
+                            return;
+                        case 'abs':
+                            result = Math.abs(currentValue);
+                            expression = `|${currentValue}|`;
+                            break;
+                        case 'reciprocal':
+                            if (currentValue === 0) throw new Error('Division by zero');
+                            result = 1 / currentValue;
+                            expression = `1/(${currentValue})`;
+                            break;
+                        case 'negate':
+                            result = -currentValue;
+                            currentOperation = result.toString();
+                            updateDisplay();
+                            return;
+                        default:
+                            return;
+                    }
+                    
+                    // 添加到历史记录
+                    addToHistory(expression, result);
+                    
+                    currentOperation = result.toString();
+                    updateDisplay();
+                } catch (error) {
+                    currentOperation = 'Error';
+                    updateDisplay();
+                }
+            }
+            
+            // 阶乘计算
+            function factorial(n) {
+                if (n === 0 || n === 1) return 1;
+                let result = 1;
+                for (let i = 2; i <= n; i++) {
+                    result *= i;
+                }
+                return result;
+            }
+            
+            // 清除计算器
+            function clearCalculator() {
+                currentOperation = '0';
+                previousOperation = '';
+                operator = null;
+                waitingForNewOperand = false;
+            }
+            
+            // 退格
+            function backspace() {
+                if (currentOperation.length > 1) {
+                    currentOperation = currentOperation.slice(0, -1);
+                } else {
+                    currentOperation = '0';
+                }
+            }
+            
+            // 内存功能
+            function handleMemory(action) {
+                const currentValue = parseFloat(currentOperation);
+                if (isNaN(currentValue)) return;
+                
+                switch (action) {
+                    case 'memory-clear':
+                        memoryValue = 0;
+                        break;
+                    case 'memory-recall':
+                        currentOperation = memoryValue.toString();
+                        break;
+                    case 'memory-add':
+                        memoryValue += currentValue;
+                        break;
+                    case 'memory-subtract':
+                        memoryValue -= currentValue;
+                        break;
+                }
+                
+                updateMemoryIndicator();
+                updateDisplay();
+            }
+            
+            // 更新内存指示器
+            function updateMemoryIndicator() {
+                memoryIndicator.innerHTML = '';
+                if (memoryValue !== 0) {
+                    const memoryItem = document.createElement('div');
+                    memoryItem.className = 'memory-item';
+                    memoryItem.textContent = `M: ${formatNumber(memoryValue.toString())}`;
+                    memoryIndicator.appendChild(memoryItem);
+                }
+            }
+            
+            // 添加到历史记录
+            function addToHistory(expression, result) {
+                calculationHistory.unshift({
+                    expression: expression,
+                    result: result
+                });
+                
+                if (calculationHistory.length > 10) {
+                    calculationHistory.pop();
+                }
+                
+                updateHistoryDisplay();
+            }
+            
+            // 更新历史记录显示
+            function updateHistoryDisplay() {
+                historyList.innerHTML = '';
+                
+                if (calculationHistory.length === 0) {
+                    const emptyMessage = document.createElement('div');
+                    emptyMessage.className = 'empty-history';
+                    emptyMessage.textContent = '暂无历史记录';
+                    historyList.appendChild(emptyMessage);
+                    return;
+                }
+                
+                calculationHistory.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    
+                    const expressionSpan = document.createElement('span');
+                    expressionSpan.className = 'history-expression';
+                    expressionSpan.textContent = item.expression + ' =';
+                    
+                    const resultSpan = document.createElement('span');
+                    resultSpan.className = 'history-result';
+                    resultSpan.textContent = formatNumber(item.result.toString());
+                    
+                    historyItem.appendChild(expressionSpan);
+                    historyItem.appendChild(resultSpan);
+                    historyList.appendChild(historyItem);
+                });
+            }
+            
+            // 清除历史记录
+            function clearHistory() {
+                calculationHistory = [];
+                updateHistoryDisplay();
+            }
+            
+            // 切换计算器模式
+            function toggleMode(mode) {
+                if (mode === 'scientific') {
+                    scientificButtons.style.display = 'grid';
+                    basicModeBtn.classList.remove('active');
+                    scientificModeBtn.classList.add('active');
+                } else {
+                    scientificButtons.style.display = 'none';
+                    scientificModeBtn.classList.remove('active');
+                    basicModeBtn.classList.add('active');
+                }
+            }
+            
+            // 切换主题
+            function toggleTheme(theme) {
+                if (theme === 'dark') {
+                    document.body.classList.add('dark-theme');
+                    lightThemeBtn.classList.remove('active');
+                    darkThemeBtn.classList.add('active');
+                    isDarkTheme = true;
+                } else {
+                    document.body.classList.remove('dark-theme');
+                    darkThemeBtn.classList.remove('active');
+                    lightThemeBtn.classList.add('active');
+                    isDarkTheme = false;
+                }
+            }
+            
+            // 键盘支持 - 修复运算符映射
+            function handleKeyDown(event) {
+                const key = event.key;
+                
+                // 阻止默认行为，避免页面滚动等
+                if (['0','1','2','3','4','5','6','7','8','9','+','-','*','/','.','=','Enter','Backspace','Delete','Escape'].includes(key)) {
+                    event.preventDefault();
+                }
+                
+                // 数字键
+                if (key >= '0' && key <= '9') {
+                    inputNumber(key);
+                    updateDisplay();
+                    return;
+                }
+                
+                // 运算符 - 修复映射
+                if (key === '+' || key === '-' || key === '*' || key === '/') {
+                    let operator;
+                    switch (key) {
+                        case '+': operator = '+'; break;
+                        case '-': operator = '-'; break;
+                        case '*': operator = '×'; break;
+                        case '/': operator = '÷'; break;
+                    }
+                    handleOperator(operator);
+                    return;
+                }
+                
+                // 小数点
+                if (key === '.') {
+                    inputDecimal();
+                    updateDisplay();
+                    return;
+                }
+                
+                // 等号或回车
+                if (key === '=' || key === 'Enter') {
+                    document.querySelector('.btn-equals').click();
+                    return;
+                }
+                
+                // 退格或删除
+                if (key === 'Backspace' || key === 'Delete') {
+                    backspace();
+                    updateDisplay();
+                    return;
+                }
+                
+                // 清除
+                if (key === 'Escape') {
+                    clearCalculator();
+                    updateDisplay();
+                    return;
+                }
+                
+                // 其他功能键映射
+                if (key === '%') {
+                    calculatePercentage();
+                    updateDisplay();
+                    return;
+                }
+                
+                // 括号支持
+                if (key === '(') {
+                    scientificFunction('open-paren');
+                    return;
+                }
+                
+                if (key === ')') {
+                    scientificFunction('close-paren');
+                    return;
+                }
+            }
+            
+            // 事件监听器
+            document.querySelectorAll('.btn-number').forEach(button => {
+                button.addEventListener('click', () => {
+                    inputNumber(button.getAttribute('data-number'));
+                    updateDisplay();
+                });
+            });
+            
+            document.querySelectorAll('.btn-operator').forEach(button => {
+                button.addEventListener('click', () => {
+                    handleOperator(button.textContent.trim());
+                });
+            });
+            
+            document.querySelectorAll('.btn-function, .btn-scientific').forEach(button => {
+                button.addEventListener('click', () => {
+                    const action = button.getAttribute('data-action');
+                    
+                    switch (action) {
+                        case 'decimal':
+                            inputDecimal();
+                            break;
+                        case 'clear':
+                            clearCalculator();
+                            break;
+                        case 'backspace':
+                            backspace();
+                            break;
+                        case 'percent':
+                            calculatePercentage();
+                            break;
+                        case 'reciprocal':
+                        case 'negate':
+                            scientificFunction(action);
+                            break;
+                        default:
+                            scientificFunction(action);
+                            break;
+                    }
+                    
+                    updateDisplay();
+                });
+            });
+            
+            document.querySelectorAll('.btn-memory').forEach(button => {
+                button.addEventListener('click', () => {
+                    handleMemory(button.getAttribute('data-action'));
+                });
+            });
+            
+            document.querySelector('.btn-equals').addEventListener('click', () => {
+                if (!operator || waitingForNewOperand) return;
+                
+                const result = calculate();
+                
+                // 添加到历史记录
+                if (result !== 'Error') {
+                    addToHistory(`${previousOperation} ${currentOperation}`, result);
+                }
+                
+                currentOperation = `${result}`;
+                previousOperation = '';
+                operator = null;
+                waitingForNewOperand = true;
+                updateDisplay();
+            });
+            
+            historyToggle.addEventListener('click', () => {
+                historyContainer.classList.toggle('show');
+                const icon = historyToggle.querySelector('.fa-chevron-down');
+                if (historyContainer.classList.contains('show')) {
+                    icon.className = 'fas fa-chevron-up';
+                } else {
+                    icon.className = 'fas fa-chevron-down';
+                }
+            });
+            
+            clearHistoryBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                clearHistory();
+            });
+            
+            basicModeBtn.addEventListener('click', () => {
+                toggleMode('basic');
+            });
+            
+            scientificModeBtn.addEventListener('click', () => {
+                toggleMode('scientific');
+            });
+            
+            lightThemeBtn.addEventListener('click', () => {
+                toggleTheme('light');
+            });
+            
+            darkThemeBtn.addEventListener('click', () => {
+                toggleTheme('dark');
+            });
+            
+            // 键盘事件监听
+            document.addEventListener('keydown', handleKeyDown);
+            
+            // 初始化显示
+            updateDisplay();
+            updateHistoryDisplay();
+        });
+    </script>
+</body>
+</html>
