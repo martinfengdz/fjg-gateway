@@ -1,0 +1,35 @@
+{
+  "glm-flash": {
+    "provider": "zhipu-glm",
+    "model": "GLM-4-Flash",
+    "base_url": "https://open.bigmodel.cn/api/paas/v4",
+    "api_key": "0a89715089e34d20b37daeb951c14814.Q8bUxRhbdDBukvMf",
+    "priority": 0,
+    "free": true,
+    "rpm": 100,
+    "timeout": 60,
+    "tag": "P0 Free Zhipu"
+  },
+  "stepfun": {
+    "provider": "stepfun",
+    "model": "step-1v-32k",
+    "base_url": "https://api.stepfun.com/v1",
+    "api_key": "61BD7buUIWN8dhCpogpZhnDoon3hpVHBAcmY4kSFG6zLLodibeE9YnjxMueiRCi2P",
+    "priority": 1,
+    "free": true,
+    "rpm": 60,
+    "timeout": 60,
+    "tag": "P1 Free StepFun"
+  },
+  "xunfei": {
+    "provider": "xfyun",
+    "model": "generalv3.5",
+    "base_url": "https://spark-api-open.xf-yun.com/v1",
+    "api_key": "3ef7f242810f1ac0734b3e3b2352a30b",
+    "priority": 2,
+    "free": true,
+    "rpm": 30,
+    "timeout": 60,
+    "tag": "P2 Free Xunfei"
+  }
+}
