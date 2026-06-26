@@ -1,28 +1,36 @@
-# FJG Gateway - 冯家军统一API管理系统
+# FJG Unified API Gateway v4.0
 
-## 启动
+统一多提供商 API 网关，支持熔断、降级、统计、BOT 追踪、密码管理后台。
+
+## 功能
+
+| 功能 | 说明 |
+|------|------|
+| 多提供商路由 | Zhipu / StepFun / Xunfei 自动切换 |
+| 熔断降级 | 失败自动降级到可用节点 |
+| 日用量统计 | 按日期 + BOT 维度统计 |
+| 月K线统计 | OHLC 趋势图 |
+| BOT 追踪 | X-BOT-Name 头识别 |
+| 密码管理后台 | 默认 123456 |
+| 健康监控 | 实时节点状态 |
+
+## 快速启动
 
 ```bash
 cd /home/agent/fjg-gateway
-
-# 1. 编辑API Key
-vim src/providers.json
-
-# 2. 启动
-sudo docker compose up -d
-
-# 3. 验证
-curl http://localhost:8088/health
-
-# 4. 打开仪表盘
-# http://容器IP:8088/
+python3 src/gateway.py
 ```
 
-## Provider优先级
+访问 http://localhost:8088/
 
-P0 智谱GLM-4-Flash (免费) → P1 阶跃Step-1v-32k (免费15天) → P2 DeepSeek (付费)
+## 配置
 
-## 安全
+src/providers.json — 提供商列表（含 API Key）
 
-- 使用 PROVIDERS_FILE 方式加载Key（Key不暴露在进程命令行中）
-- providers.json 权限 600（仅属主可读）
+## 升级
+
+./upgrade.sh
+
+## 版本历史
+
+- v4.0.0 — 密码认证 + 日用量/月K线/BOT统计 + 管理后台
