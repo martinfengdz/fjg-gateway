@@ -25,11 +25,30 @@ python3 src/gateway.py
 
 ## 配置
 
-src/providers.json — 提供商列表（含 API Key）
+编辑 `src/providers.json`，填入各提供商 API Key：
+
+```json
+{
+  "glm-flash": {
+    "api_key": "你的智谱API Key",
+    ...
+  },
+  "stepfun": {
+    "api_key": "你的StepFun API Key",
+    ...
+  },
+  "xunfei": {
+    "api_key": "你的讯飞API Key",
+    ...
+  }
+}
+```
 
 ## 升级
 
+```bash
 ./upgrade.sh
+```
 
 ## 版本历史
 
