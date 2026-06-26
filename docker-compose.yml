@@ -10,13 +10,12 @@ services:
     volumes:
       - ./src:/app/src:ro
       - ./data:/app/data
-      - ./static:/app/static:ro
     environment:
       - PROVIDERS_FILE=/app/src/providers.json
       - FJG_STATE_DIR=/app/data
       - PORT=8088
-    working_dir: /app/src
-    command: python3 gateway.py
+    working_dir: /app
+    command: python3 src/gateway.py
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
       interval: 30s
